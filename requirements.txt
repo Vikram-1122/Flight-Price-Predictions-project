@@ -1,0 +1,2 @@
+apache-airflow==2.8.2 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.8.2/constraints-3.10.txt
+pandas==2.2.1
