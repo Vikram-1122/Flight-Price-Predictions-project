@@ -1,2 +1,6 @@
-apache-airflow==2.8.2 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.8.2/constraints-3.10.txt
-pandas==2.2.1
+apache-airflow==2.9.0 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.8.2/constraints-3.10.txt
+fastapi==0.95.2
+uvicorn==0.22.0
+scikit-learn==1.0.1
+pandas==1.3.3
+joblib==1.1.0
