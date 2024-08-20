@@ -17,12 +17,12 @@ def my_dag_example():
     @task
     def task_1() -> int:
         logging.info('Task one')
-        return 1
+        return 2
 
     @task
     def task_2(x: int) -> int:
         logging.info(f'{x = }')
-        return x + 1
+        return x * 5
 
     # Task relationships
     x = task_1()
