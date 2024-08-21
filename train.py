@@ -1,4 +1,5 @@
 # train.py
+import sys
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
@@ -7,7 +8,8 @@ import joblib
 from preprocess import get_preprocessor
 
 # Load the dataset
-file_path = r'C:/Users/sumith singh/dsp-skyprix/flight_data.csv'
+sys.path.append('..')
+file_path = r'../dsp-skyprix/flight_data.csv'
 flight_data = pd.read_csv(file_path)
 
 # Drop unnecessary columns
