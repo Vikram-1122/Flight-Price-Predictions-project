@@ -4,13 +4,12 @@ from datetime import timedelta
 from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
 
-
 @dag(
     dag_id='dsp_example',
     description='DSP Example DAG',
     tags=['dsp'],
     schedule=timedelta(minutes=2),
-    start_date=days_ago(n=0, hour=1),  # sets the starting point of the DAG
+    start_date=days_ago(1),  # Corrected to 1 day ago
     max_active_runs=1  # Ensure only one active run at a time
 )
 def my_dag_example():
@@ -27,8 +26,7 @@ def my_dag_example():
     # Task relationships
     x = task_1()
     y = task_2(x=x)
-    print(y)
+    logging.info(f'Task 2 result: {y}')
 
-
-# Run dag
+# Instantiate the DAG
 example_dag = my_dag_example()
