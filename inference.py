@@ -8,12 +8,12 @@ pipeline = joblib.load(model_filename)
 def predict(features):
     # Convert features to DataFrame
     # Replace column_names with actual names used during training
-<<<<<<< HEAD
+
     column_names = ['duration', 'days_left'  , 'airline', 'source_city', 'departure_time', 'stops', 
                         'arrival_time', 'destination_city', 'class']
-=======
+
     column_names = ['duration', 'days_left', 'airline', 'source_city', 'departure_time', 'stops', 'arrival_time', 'destination_city', 'class']
->>>>>>> w4
+
     features_df = pd.DataFrame([features], columns=column_names)
     prediction = pipeline.predict(features_df)
     return prediction[0]
@@ -26,7 +26,4 @@ if __name__ == "__main__":
     
     predicted_price = predict(example_features)
     print(f"Predicted flight price: {predicted_price}")
-<<<<<<< HEAD
-=======
 
->>>>>>> w4

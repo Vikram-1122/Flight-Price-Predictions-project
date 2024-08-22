@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-# preprocess.py
->>>>>>> w4
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 
