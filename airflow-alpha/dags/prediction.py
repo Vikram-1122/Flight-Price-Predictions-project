@@ -1,9 +1,11 @@
+import sys
 import pickle
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime
 import os
 
+sys.path.append('..')
 default_args = {
     'owner': 'airflow',
     'start_date': datetime(2023, 8, 1),
@@ -11,20 +13,20 @@ default_args = {
 }
 
 def check_for_new_data():
-    good_data_folder = '/path/to/good_data'  # Replace with actual path
+    good_data_folder = '..\dsp-skyprix\good_data'  # Replace with actual path
     files = os.listdir(good_data_folder)
     if files:
         return files
     return []
 
 def make_predictions(file_paths):
-    model_path = '/mnt/data/price_prediction_model.pkl'
+    model_path = '../price_prediction_model.pkl'
     with open(model_path, 'rb') as model_file:
         model = pickle.load(model_file)
     
     for file_path in file_paths:
         data = pd.read_csv(file_path)
-        predictions = model.predict(data[['feature1', 'feature2']])  # Replace with actual feature names
+        predictions = model.predict(data[['source_city', 'destination_city']])  # Replace with actual feature names
         data['predictions'] = predictions
         data.to_csv(file_path.replace('good_data', 'predicted_data'), index=False)
 
