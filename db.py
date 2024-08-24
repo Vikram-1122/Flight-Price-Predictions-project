@@ -1,37 +1,44 @@
-# db.py
-from sqlalchemy import create_engine, Column, Integer, String, Float, Date
+from sqlalchemy import create_engine, Column, Integer, String, Float, Date, Time
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from datetime import datetime
 
-# Database configuration
-SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://postgres:root@localhost:5432/predictions"
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# PostgreSQL database URL
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:root@localhost:5432/predictions"
+
+# Create the engine
+engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)  # Set echo=True for SQL query logging (optional)
+
+# Create a configured "Session" class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Create a base class for declarative class definitions
 Base = declarative_base()
 
 class Prediction(Base):
     __tablename__ = "predictions"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    prediction_date = Column(Date, nullable=False) 
-    airline = Column(String(50), nullable=False)
-    flight = Column(String(20))
-    source_city = Column(String(50), nullable=False)
-    departure_time = Column(String(50), nullable=False)
-    stops = Column(String(50), nullable=False)
-    arrival_time = Column(String(50), nullable=False)
-    destination_city = Column(String(50), nullable=False)
-    class_flight = Column(String(10), nullable=False)
-    duration = Column(Float, nullable=False)
-    days_left = Column(Integer, nullable=False)
-    price = Column(Float, nullable=False)
-    prediction_result = Column(Float, nullable=False)
-    prediction_source = Column(String(50), nullable=False)
+
+    id = Column(Integer, primary_key=True, index=True)
+    prediction_date = Column(Date, default=datetime.utcnow)
+    airline = Column(String, index=True)
+    flight = Column(String)
+    source_city = Column(String)
+    departure_time = Column(Time)
+    stops = Column(Integer)
+    arrival_time = Column(Time)
+    destination_city = Column(String)
+    class_flight = Column("class", String)  
+    duration = Column(Float)
+    days_left = Column(Integer)
+    price = Column(Float)
+    prediction_result = Column(Float)
+    prediction_source = Column(String)
+
+# Function to initialize the database
 def init_db():
+    """Create the tables in the database."""
     Base.metadata.create_all(bind=engine)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Example usage
+if __name__ == "__main__":
+    init_db()
