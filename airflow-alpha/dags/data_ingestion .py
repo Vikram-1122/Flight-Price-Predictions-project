@@ -18,8 +18,8 @@ def read_data():
         return file_path
     return None
 
-def validate_data(file_path):
-    data = pd.read_csv(file_path)
+def validate_data(C:\Users\Vikram\dsp-skyprix):
+    data = pd.read_csv(C:\Users\Vikram\dsp-skyprix)
     # Implement data validation checks
     # Raise exception if critical issues are found
 
