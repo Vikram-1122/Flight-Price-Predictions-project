@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import streamlit as st
 import requests
 import pandas as pd
@@ -27,15 +26,6 @@ def add_background():
         unsafe_allow_html=True
     )
 
-=======
-import requests
-import streamlit as st
-import pandas as pd
-
-# FastAPI endpoint URLs
-PREDICT_URL = 'http://localhost:8000/predict-flight'
-PAST_PREDICTIONS_URL = 'http://localhost:8000/past-flight-predictions'
->>>>>>> 8517f8ffbc247d117642f07772990f29938c1687
 
 # Prediction page
 def prediction_page():
@@ -52,16 +42,10 @@ def prediction_page():
     stops = st.selectbox("Stops", ["zero", "one", "two", "three", "four"])
     arrival_time = st.selectbox("Arrival Time", ["Early_Morning", "Morning", "Afternoon", "Evening", "Night"])
     destination_city = st.selectbox("Destination City", ["Mumbai", "Delhi", "Hyderabad", "Bangalore", "Kolkata", "Chennai"])
-<<<<<<< HEAD
     class_flight = st.selectbox("Flight Class", ["Economy", "Business", "First"])
     duration = st.number_input("Duration (in hours)", min_value=0.0, step=0.1)
     days_left = st.number_input("Days Left to Departure", min_value=0, step=1)
     price = st.number_input("Price (in your currency)", min_value=0.0, step=100.0)
-=======
-    class_ = st.selectbox("Class", ["Economy", "Business", "First"])
-    duration = st.number_input("Duration (in hours)", min_value=0.0, step=0.1)
-    days_left = st.number_input("Days Left to Departure", min_value=0, step=1)
->>>>>>> 8517f8ffbc247d117642f07772990f29938c1687
     
     # Predict button
     if st.button("Predict"):
@@ -73,16 +57,10 @@ def prediction_page():
             'stops': stops,
             'arrival_time': arrival_time,
             'destination_city': destination_city,
-<<<<<<< HEAD
             'class': class_flight,
             'duration': duration,
             'days_left': days_left,
             'price': price
-=======
-            'class': class_,
-            'duration': duration,
-            'days_left': days_left
->>>>>>> 8517f8ffbc247d117642f07772990f29938c1687
         }
         
         # Make API request to model service with feature values
@@ -101,7 +79,6 @@ def prediction_page():
     st.subheader("Multiple Flight Predictions")
     file = st.file_uploader("Upload CSV file", type=["csv"])
 
-<<<<<<< HEAD
     if file and st.button("Predict Multiple"):
         # Convert file to string and then to pandas DataFrame
         file_contents = file.read().decode('utf-8')
@@ -127,30 +104,6 @@ def prediction_page():
             st.table(predictions_data)
         else:
             st.write("Error making prediction:", response.text)
-=======
-    if file is not None and st.button("Predict Multiple"):
-        # Read CSV file and extract feature values
-        df = pd.read_csv(file)
-        data = df.to_dict('records')
-
-        # Make API request to model service with feature values and display prediction results
-        predictions = []
-        for row in data:
-            response = requests.post(PREDICT_URL, json=row)
-            if response.status_code == 200:
-                result = response.json()
-                row['Prediction'] = result['prediction']
-                predictions.append(row)
-            else:
-                st.write("Error making prediction:", response.text)
-
-        # Display prediction results
-        if predictions:
-            st.write("Predictions:")
-            st.table(predictions)
-        else:
-            st.write("No predictions to display.")
->>>>>>> 8517f8ffbc247d117642f07772990f29938c1687
 
 # Past predictions display webpage
 def past_predictions_page():
@@ -187,14 +140,10 @@ def past_predictions_page():
 # Main Streamlit app
 def main():
     st.set_page_config(layout="wide")
-<<<<<<< HEAD
     st.title("𝗪𝗲𝗹𝗰𝗼𝗺𝗲 𝘁𝗼 𝗦𝗸𝘆𝗽𝗿𝗶𝘅")
 
     # Add background
     add_background()
-=======
-    st.title("𝗪𝗲𝗹𝗰𝗼𝗺𝗲 𝘁𝗼 𝗦𝗸𝘆𝗣𝗿𝗶𝘅")
->>>>>>> 8517f8ffbc247d117642f07772990f29938c1687
     
     # Navigation menu
     page = st.sidebar.radio("Select Page", ["Prediction", "Past Predictions"])
@@ -206,8 +155,4 @@ def main():
         past_predictions_page()
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     main()
-=======
-    main()
->>>>>>> 8517f8ffbc247d117642f07772990f29938c1687
