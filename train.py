@@ -1,13 +1,11 @@
-import sys
+import joblib
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
-import joblib
 from preprocess import get_preprocessor
+from sklearn.model_selection import train_test_split
 
 # Load the dataset
-sys.path.append('..')
 file_path = r'../dsp-skyprix/flight_data.csv'
 flight_data = pd.read_csv(file_path)
 
@@ -19,13 +17,9 @@ X = flight_data_cleaned.drop(columns='price')
 y = flight_data_cleaned['price']
 
 # Split the data into training and testing sets
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 
-
-# Get the preprocessor from preprocess.py
+# Get the preprocessor
 preprocessor = get_preprocessor()
 
 # Define the model
@@ -38,8 +32,8 @@ pipeline = Pipeline(steps=[('preprocessor', preprocessor),
 # Train the model
 pipeline.fit(X_train, y_train)
 
-# Save the model to a file
-model_filename = 'flight_price_prediction_model.pkl'
-joblib.dump(pipeline, model_filename)
+# Save the pipeline to a file
+joblib.dump(pipeline, 'flight_price_prediction_pipeline.pkl')
 
-print(f"Model trained and saved as {model_filename}")
+print("Model and preprocessor trained and saved.")
+

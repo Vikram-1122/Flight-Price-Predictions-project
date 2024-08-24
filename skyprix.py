@@ -1,10 +1,31 @@
-import requests
 import streamlit as st
+import requests
 import pandas as pd
+from io import StringIO
 
 # FastAPI endpoint URLs
-PREDICT_URL = 'http://localhost:8000/predict-flight'
-PAST_PREDICTIONS_URL = 'http://localhost:8000/past-flight-predictions'
+PREDICT_URL = 'http://localhost:8000/predict/'
+PAST_PREDICTIONS_URL = 'http://localhost:8000/past-predictions'
+
+def add_background():
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background-image: url("https://wallpapers.com/images/featured/4k-plane-39efmsuz0fhub1c3.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        .stHeader {
+            color: #ffffff;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
 
 # Prediction page
 def prediction_page():
@@ -21,9 +42,10 @@ def prediction_page():
     stops = st.selectbox("Stops", ["zero", "one", "two", "three", "four"])
     arrival_time = st.selectbox("Arrival Time", ["Early_Morning", "Morning", "Afternoon", "Evening", "Night"])
     destination_city = st.selectbox("Destination City", ["Mumbai", "Delhi", "Hyderabad", "Bangalore", "Kolkata", "Chennai"])
-    class_ = st.selectbox("Class", ["Economy", "Business", "First"])
+    class_flight = st.selectbox("Flight Class", ["Economy", "Business", "First"])
     duration = st.number_input("Duration (in hours)", min_value=0.0, step=0.1)
     days_left = st.number_input("Days Left to Departure", min_value=0, step=1)
+    price = st.number_input("Price (in your currency)", min_value=0.0, step=100.0)
     
     # Predict button
     if st.button("Predict"):
@@ -35,9 +57,10 @@ def prediction_page():
             'stops': stops,
             'arrival_time': arrival_time,
             'destination_city': destination_city,
-            'class': class_,
+            'class': class_flight,
             'duration': duration,
-            'days_left': days_left
+            'days_left': days_left,
+            'price': price
         }
         
         # Make API request to model service with feature values
@@ -56,28 +79,31 @@ def prediction_page():
     st.subheader("Multiple Flight Predictions")
     file = st.file_uploader("Upload CSV file", type=["csv"])
 
-    if file is not None and st.button("Predict Multiple"):
-        # Read CSV file and extract feature values
-        df = pd.read_csv(file)
-        data = df.to_dict('records')
+    if file and st.button("Predict Multiple"):
+        # Convert file to string and then to pandas DataFrame
+        file_contents = file.read().decode('utf-8')
+        df = pd.read_csv(StringIO(file_contents))
+        
+        # Check if 'price' column exists and drop the serial number column
+        if 'price' in df.columns:
+            df_cleaned = df.drop(columns=df.columns[0])  # Drop the serial number column
+        else:
+            st.write("Error: CSV file must contain a 'price' column.")
+            return
+        
+        data = df_cleaned.to_dict('records')
 
         # Make API request to model service with feature values and display prediction results
-        predictions = []
-        for row in data:
-            response = requests.post(PREDICT_URL, json=row)
-            if response.status_code == 200:
-                result = response.json()
-                row['Prediction'] = result['prediction']
-                predictions.append(row)
-            else:
-                st.write("Error making prediction:", response.text)
-
-        # Display prediction results
-        if predictions:
+        response = requests.post(PREDICT_URL, files={'file': ('data_1.csv', StringIO(file_contents), 'text/csv')})
+        if response.status_code == 200:
+            result = response.json()
+            predictions = result['predictions']
+            predictions_data = df_cleaned.copy()
+            predictions_data['Prediction'] = predictions
             st.write("Predictions:")
-            st.table(predictions)
+            st.table(predictions_data)
         else:
-            st.write("No predictions to display.")
+            st.write("Error making prediction:", response.text)
 
 # Past predictions display webpage
 def past_predictions_page():
@@ -114,7 +140,10 @@ def past_predictions_page():
 # Main Streamlit app
 def main():
     st.set_page_config(layout="wide")
-    st.title("𝗪𝗲𝗹𝗰𝗼𝗺𝗲 𝘁𝗼 𝗦𝗸𝘆𝗣𝗿𝗶𝘅")
+    st.title("𝗪𝗲𝗹𝗰𝗼𝗺𝗲 𝘁𝗼 𝗦𝗸𝘆𝗽𝗿𝗶𝘅")
+
+    # Add background
+    add_background()
     
     # Navigation menu
     page = st.sidebar.radio("Select Page", ["Prediction", "Past Predictions"])
