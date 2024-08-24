@@ -1,4 +1,4 @@
-﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,class,duration,days_left,price
+﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
 271323,Air_India,AI-770,Kolkata,Night,one,Morning,Hyderabad,Business,14,0,52063
 271324,Air_India,AI-770,Kolkata,Night,one,Morning,Hyderabad,Business,15.42,1,52063
 271325,Air_India,AI-763,Kolkata,Early_Morning,one,Night,Hyderabad,Business,16.58,2,52063

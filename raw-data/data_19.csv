@@ -1,4 +1,4 @@
-﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,class,duration,days_left,price
+﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
 1,SpiceJet,SG-2277,Delhi,Afternoon,one,Evening,Mumbai,Economy,25.75,8,19464
 2,Air_India,AI-885,Delhi,Morning,one,Night,Mumbai,Economy,11.5,8,19500
 3,Air_India,AI-885,Delhi,Morning,one,Evening,Mumbai,Economy,5.67,8,20760

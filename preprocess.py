@@ -3,7 +3,7 @@ from sklearn.compose import ColumnTransformer
 
 def get_preprocessor():
     categorical_cols = ['airline', 'source_city', 'departure_time', 'stops', 
-                        'arrival_time', 'destination_city', 'class']
+                        'arrival_time', 'destination_city', 'travel_class']
     numerical_cols = ['duration', 'days_left']
 
     # Preprocessing for numerical data

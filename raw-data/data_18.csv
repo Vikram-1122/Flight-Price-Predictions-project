@@ -1,4 +1,4 @@
-﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,class,duration,days_left,price
+﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
 1,GO_FIRST,G8-1404,Delhi,Morning,one,Evening,Mumbai,Economy,7.08,8,13699
 2,Air_India,AI-401,Delhi,Early_Morning,one,Night,Mumbai,Economy,13.25,8,13830
 3,Vistara,UK-839,Delhi,Afternoon,one,Night,Mumbai,Economy,9.08,8,14565

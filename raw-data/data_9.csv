@@ -1,4 +1,4 @@
-﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,class,duration,days_left,price
+﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
 1,Vistara,UK-673,Delhi,Afternoon,one,Evening,Mumbai,Economy,5,2,19343
 2,Vistara,UK-627,Delhi,Afternoon,one,Afternoon,Mumbai,Economy,26.67,2,19553
 3,Vistara,UK-705,Delhi,Early_Morning,one,Afternoon,Mumbai,Economy,6.5,2,19815

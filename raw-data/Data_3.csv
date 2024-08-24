@@ -1,4 +1,4 @@
-﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,class,duration,days_left,price
+﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
 1,Air_India,AI-453,Delhi,Early_Morning,one,Afternoon,Mumbai,Economy,8.83,2,11900
 2,SpiceJet,SG-2976,Delhi,Evening,two,Night,Mumbai,Economy,4.5,1,12123
 3,SpiceJet,SG-2976,Delhi,Evening,one,Morning,Mumbai,Economy,15.25,1,12123
