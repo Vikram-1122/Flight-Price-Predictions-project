@@ -5,7 +5,7 @@ from datetime import datetime
 from io import StringIO
 
 # FastAPI endpoint URLs
-PREDICT_URL = 'http://localhost:8000/predict/'
+PREDICT_URL = 'http://localhost:8000/predict'
 PAST_PREDICT_URL = 'http://localhost:8000/past-predictions'
 
 def add_background():

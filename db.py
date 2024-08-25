@@ -22,7 +22,7 @@ class Prediction(Base):
     travel_class = Column(String)  # Updated to match the CSV column name
     duration = Column(Float)
     days_left = Column(Integer)
-    price = Column(Integer)
+    price = Column(Integer, nullable=True)
     prediction_result = Column(Float)
     prediction_source = Column(String)
 

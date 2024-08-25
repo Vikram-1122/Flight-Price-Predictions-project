@@ -56,23 +56,35 @@ def handle_file(file: UploadFile):
 
 def handle_json(input: SinglePredictionInput):
     X = pd.DataFrame([input.dict()])
-    logger.info(f"Single prediction input received: {input.dict()}")
+    logger.info(f"Single prediction input received: {X.head()}")
     return X
 
-@app.post("/predict/")
+@app.post("/predict")
 async def predict_price(
     file: UploadFile = File(None),
     input: SinglePredictionInput = Body(None),
     db: Session = Depends(get_db)
 ):
+    logger.info(f"Received file: {file is not None}")
+    logger.info(f"Received JSON input: {input}")
+    
     if file is None and input is None:
         raise HTTPException(status_code=400, detail="Either a file or JSON input is required.")
 
     if file:
-        X = handle_file(file)
+        try:
+            X = handle_file(file)
+        except HTTPException as e:
+            logger.error(f"File processing error: {e.detail}")
+            raise e
     elif input:
-        X = handle_json(input)
+        try:
+            X = handle_json(input)
+        except Exception as e:
+            logger.error(f"JSON processing error: {str(e)}")
+            raise HTTPException(status_code=400, detail="Invalid JSON input")
     else:
+        logger.error("Neither file nor JSON input received.")
         raise HTTPException(status_code=400, detail="Either a file or JSON input is required.")
 
     pipeline_filename = 'flight_price_prediction_model.pkl'
@@ -87,6 +99,7 @@ async def predict_price(
     except Exception as e:
         logger.error(f"Error in preprocessing or prediction: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Error in preprocessing or prediction: {str(e)}")
+    
     
     for i in range(len(predictions)):
         features = X.iloc[i].to_dict()
