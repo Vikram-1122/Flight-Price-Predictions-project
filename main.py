@@ -29,7 +29,7 @@ class SinglePredictionInput(BaseModel):
     travel_class: str
     duration: float
     days_left: int
-    price: float
+    price: int
 
 def handle_file(file: UploadFile):
     contents = file.file.read().decode('utf-8')
@@ -103,7 +103,7 @@ async def predict_price(
             travel_class=features.get('travel_class', ''),
             duration=features.get('duration', 0.0),
             days_left=features.get('days_left', 0),
-            price=features.get('price', 0.0),
+            price=features.get('price', 0),
             prediction_result=prediction,
             prediction_source='file_upload' if file else 'json_input'
         )

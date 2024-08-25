@@ -43,7 +43,7 @@ def prediction_page():
     travel_class = st.selectbox("Travel Class", ["Economy", "Business", "First"])
     duration = st.number_input("Duration (in hours)", min_value=0.0, step=0.1)
     days_left = st.number_input("Days Left to Departure", min_value=0, step=1)
-    price = st.number_input("Price (in your currency)", min_value=0.0, step=100.0)
+    price = st.number_input("Price (in your currency)", min_value=0, step=100)
 
     if st.button("Predict"):
         data = {
