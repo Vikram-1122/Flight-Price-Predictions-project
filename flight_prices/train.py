@@ -8,7 +8,7 @@ from preprocess import get_preprocessor
 
 # Load the dataset
 sys.path.append('..')
-file_path = r'../dsp-skyprix/flight_data.csv'
+file_path = r'../flight_data.csv'
 flight_data = pd.read_csv(file_path)
 
 # Drop unnecessary columns
