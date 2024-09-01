@@ -1,0 +1,14 @@
+﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
+1,GO_FIRST,G8-237,Delhi,Afternoon,one,Night,Mumbai,Economy,9.25,9,5954
+2,GO_FIRST,G8-103,Delhi,Evening,one,Early_Morning,Mumbai,Economy,12.33,9,5954
+3,GO_FIRST,G8-719,Delhi,Early_Morning,one,Night,Mumbai,Economy,14.25,9,5954
+4,GO_FIRST,G8-119,Delhi,Evening,one,Morning,Mumbai,Economy,15.17,9,5954
+5,GO_FIRST,G8-113,Delhi,Early_Morning,one,Night,Mumbai,Economy,15.75,9,5954
+6,Air_India,AI-441,Delhi,Evening,one,Night,Mumbai,Economy,3.75,9,5955
+7,SpiceJet,SG-8709,Delhi,Evening,zero,Night,Mumbai,Economy,2.17,9,6060
+8,SpiceJet,SG-8483,Delhi,Evening,one,Early_Morning,Mumbai,Economy,13.25,9,6060
+9,Indigo,6E-6202,Delhi,Morning,zero,Afternoon,Mumbai,Economy,2.17,9,6165
+10,Indigo,6E-5041,Delhi,Evening,zero,Night,Mumbai,Economy,2.17,9,6165
+11,Indigo,6E-6722,Delhi,Night,zero,Night,Mumbai,Economy,2.25,9,6165
+12,Indigo,6E-2092,Delhi,Evening,one,Night,Mumbai,Economy,5.33,9,6443
+13,GO_FIRST,G8-336,Delhi,Afternoon,zero,Evening,Mumbai,Economy,2.25,9,6532

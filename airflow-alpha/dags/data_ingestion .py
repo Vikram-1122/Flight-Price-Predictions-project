@@ -1,46 +1,104 @@
-from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
-from datetime import datetime
+import logging
 import pandas as pd
 import os
+import shutil
+from datetime import timedelta
+from airflow.decorators import dag, task
+from airflow.utils.dates import days_ago
 
+# Default arguments for DAG
 default_args = {
     'owner': 'airflow',
-    'start_date': datetime(2023, 8, 1),
     'retries': 1
 }
 
-def read_data():
-    raw_data_folder = '/path/to/raw_data'  # Replace with actual path
-    files = os.listdir(raw_data_folder)
-    if files:
-        file_path = os.path.join(raw_data_folder, files[0])
+# Define DAG using @dag decorator
+@dag(
+    dag_id='data_ingestion_dag',
+    description='A DAG for ingesting, validating, and processing data',
+    tags=['data_ingestion'],
+    schedule_interval=timedelta(minutes=5),  # Run every 5 minutes
+    start_date=days_ago(1),  # Start date set to 1 day ago
+    max_active_runs=1  # Ensure only one active run at a time
+)
+def my_data_ingestion_dag():
+    
+    # Task to read data from raw data folder
+    @task
+    def read_data() -> str:
+        raw_data_folder = '/opt/airflow/raw_data'  # Use absolute path inside container
+        files = os.listdir(raw_data_folder)
+        if files:
+            file_path = os.path.join(raw_data_folder, files[0])
+            logging.info(f"Reading file: {file_path}")
+            return file_path
+        logging.warning("No files found in raw data folder")
+        return ""
+
+    # Task to validate the data
+    @task
+    def validate_data(file_path: str) -> str:
+        if not file_path:
+            logging.error("No file provided for validation")
+            raise ValueError("No file path provided")
+        
+        data = pd.read_csv(file_path)
+        critical_columns = ['airline', 'flight', 'source_city', 'destination_city', 'travel_class', 'duration', 'price']
+        if data[critical_columns].isnull().values.any():
+            raise ValueError("Critical columns contain missing values!")
+            
+        valid_stops = ['zero', 'one', 'two_or_more','three','four','five','two']
+        invalid_stops = data[~data['stops'].isin(valid_stops)]['stops'].unique()
+        if len(invalid_stops) > 0:
+            logging.error(f"Invalid stops values found: {invalid_stops}")
+            raise ValueError("Stops column contains invalid values.")
+        logging.info("Data validation passed.")
         return file_path
-    return None
 
-def validate_data(C:\Users\Vikram\dsp-skyprix):
-    data = pd.read_csv(C:\Users\Vikram\dsp-skyprix)
-    # Implement data validation checks
-    # Raise exception if critical issues are found
+    # Task to save statistics
+    @task
+    def save_statistics(file_path: str):
+        data = pd.read_csv(file_path)
+        statistics = data.describe(include='all')
+        statistics_file_path = '/opt/airflow/data_statistics.csv'  # Use absolute path inside container
+        statistics.to_csv(statistics_file_path)
+        logging.info(f"Statistics saved to {statistics_file_path}.")
 
-def save_statistics(data):
-    # Save data statistics to the database
-    pass
+    # Task to send alerts
+    @task
+    def send_alerts():
+        logging.warning("Alert: Data validation failed or critical issues found. Please check the logs and data.")
 
-def send_alerts():
-    # Send alerts if needed
-    pass
+    # Task to split and save data
+    @task
+    def split_and_save_data(file_path: str):
+        data = pd.read_csv(file_path)
+        good_data_condition = (
+            data['airline'].notnull() &
+            data['flight'].notnull() &
+            data['source_city'].notnull() &
+            data['destination_city'].notnull() &
+            data['travel_class'].notnull() &
+            data['duration'].between(0.5, 50) &
+            (data['price'] > 0) &
+            (data['days_left'] >= 0) &
+            data['stops'].isin(['zero', 'one', 'two_or_more','two','three','four','five']) &
+            data['departure_time'].isin(['Morning', 'Afternoon', 'Evening', 'Night', 'Early_Morning']) &
+            data['arrival_time'].isin(['Morning', 'Afternoon', 'Evening', 'Night', 'Early_Morning'])
+        )
 
-def split_and_save_data(file_path):
-    data = pd.read_csv(file_path)
-    # Split data into good_data and bad_data
-    # Save the data in appropriate folders
+        destination_folder = '/opt/airflow/good_data' if good_data_condition.all() else '/opt/airflow/bad_data'
+        filename = os.path.basename(file_path)
+        destination_path = os.path.join(destination_folder, filename)
+        shutil.move(file_path, destination_path)
+        logging.info(f"File has been moved to {destination_path}.")
 
-with DAG('data_ingestion_dag', default_args=default_args, schedule_interval='@daily') as dag:
-    read_data_task = PythonOperator(task_id='read_data', python_callable=read_data)
-    validate_data_task = PythonOperator(task_id='validate_data', python_callable=validate_data)
-    save_statistics_task = PythonOperator(task_id='save_statistics', python_callable=save_statistics)
-    send_alerts_task = PythonOperator(task_id='send_alerts', python_callable=send_alerts)
-    split_and_save_data_task = PythonOperator(task_id='split_and_save_data', python_callable=split_and_save_data)
+    # Define task dependencies
+    file_path = read_data()
+    validated_file_path = validate_data(file_path)
+    save_statistics(validated_file_path)
+    send_alerts()
+    split_and_save_data(validated_file_path)
 
-    read_data_task >> validate_data_task >> [save_statistics_task, send_alerts_task, split_and_save_data_task]
+# Instantiate the DAG
+data_ingestion_dag = my_data_ingestion_dag()
