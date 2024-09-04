@@ -1,107 +1,105 @@
-import logging
 import pandas as pd
 import os
 import shutil
+import random
 from datetime import timedelta
 from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
+from airflow.providers.microsoft.teams.operators.teams import TeamsWebhookOperator
 
-# Default arguments for DAG
+# Define default arguments
 default_args = {
     'owner': 'airflow',
     'retries': 1
 }
 
-# Define DAG using @dag decorator
 @dag(
     dag_id='data_ingestion_dag',
-    description='A DAG for ingesting, validating, and processing data',
+    description='DAG for data ingestion and validation',
     tags=['data_ingestion'],
-    schedule_interval=timedelta(minutes=5),  # Run every 5 minutes
-    start_date=days_ago(1),  # Start date set to 1 day ago
-    max_active_runs=1,  # Ensure only one active run at a time
+    schedule_interval=timedelta(days=1),
+    start_date=days_ago(1),
+    max_active_runs=1,
     default_args=default_args,
 )
-def my_data_ingestion_dag():
-    
-    # Task to read data from raw data folder
+def data_ingestion_dag():
+
     @task
     def read_data() -> str:
-        raw_data_folder = '/opt/airflow/raw_data'  # Use absolute path inside container
-        files = os.listdir(raw_data_folder)
-        if files:
-            file_path = os.path.join(raw_data_folder, files[0])
-            logging.info(f"Reading file: {file_path}")
-            return file_path
-        logging.warning("No files found in raw data folder")
-        return ""
-
-    # Task to validate the data
-    @task
-    def validate_data(file_path: str) -> str:
-        if not file_path:
-            logging.error("No file provided for validation")
-            raise ValueError("No file path provided")
-        
-        data = pd.read_csv(file_path)
-        critical_columns = ['airline', 'flight', 'source_city', 'destination_city', 'travel_class', 'duration', 'price']
-        if data[critical_columns].isnull().values.any():
-            raise ValueError("Critical columns contain missing values!")
-            
-        valid_stops = ['zero', 'one', 'two_or_more','three','four','five','two']
-        invalid_stops = data[~data['stops'].isin(valid_stops)]['stops'].unique()
-        if len(invalid_stops) > 0:
-            logging.error(f"Invalid stops values found: {invalid_stops}")
-            raise ValueError("Stops column contains invalid values.")
-        logging.info("Data validation passed.")
+        raw_data_folder = '/opt/airflow/raw_data'
+        files = [f for f in os.listdir(raw_data_folder) if os.path.isfile(os.path.join(raw_data_folder, f))]
+        if not files:
+            raise ValueError("No files found in the raw_data folder.")
+        selected_file = random.choice(files)
+        file_path = os.path.join(raw_data_folder, selected_file)
         return file_path
 
-    # Task to save statistics
     @task
-    def save_statistics(file_path: str):
-        data = pd.read_csv(file_path)
-        statistics = data.describe(include='all')
-        statistics_file_path = '/opt/airflow/data_statistics.csv'  # Use absolute path inside container
-        statistics.to_csv(statistics_file_path)
-        logging.info(f"Statistics saved to {statistics_file_path}.")
+    def validate_data(file_path: str) -> (str, list):
+        errors = []
+        try:
+            data = pd.read_csv(file_path)
+            
+            if 'duration' not in data.columns:
+                errors.append("Missing 'duration' column.")
+            else:
+                # Check if 'duration' contains numeric values
+                if not pd.to_numeric(data['duration'], errors='coerce').notna().all():
+                    errors.append("Invalid values in 'duration' column.")
+                
+            # Example validation: Check for empty rows
+            if data.isnull().values.any():
+                errors.append("Null values found in the data.")
 
-    # Task to send alerts
-    @task
-    def send_alerts():
-        logging.warning("Alert: Data validation failed or critical issues found. Please check the logs and data.")
+        except Exception as e:
+            errors.append(str(e))
+        
+        is_valid = len(errors) == 0
+        return file_path, errors, is_valid
 
-    # Task to split and save data
     @task
-    def split_and_save_data(file_path: str):
-        data = pd.read_csv(file_path)
-        good_data_condition = (
-            data['airline'].notnull() &
-            data['flight'].notnull() &
-            data['source_city'].notnull() &
-            data['destination_city'].notnull() &
-            data['travel_class'].notnull() &
-            data['duration'].between(0.5, 50) &
-            (data['price'] > 0) &
-            (data['days_left'] >= 0) &
-            data['stops'].isin(['zero', 'one', 'two_or_more','two','three','four','five']) &
-            data['departure_time'].isin(['Morning', 'Afternoon', 'Evening', 'Night', 'Early_Morning']) &
-            data['arrival_time'].isin(['Morning', 'Afternoon', 'Evening', 'Night', 'Early_Morning'])
+    def save_statistics(file_path: str, errors: list, is_valid: bool):
+        # Implement statistics saving logic here
+        stats_path = '/opt/airflow/data_statistics.csv'
+        if not os.path.isfile(stats_path):
+            # Create header if file does not exist
+            with open(stats_path, 'w') as f:
+                f.write("file_path,is_valid,error_count,errors\n")
+        with open(stats_path, 'a') as f:
+            f.write(f"{file_path},{is_valid},{len(errors)},{'|'.join(errors)}\n")
+
+    @task
+    def send_alerts(file_path: str, errors: list):
+        # Generate report
+        report = f"Data validation report for file: {file_path}\n"
+        if errors:
+            report += "Errors:\n" + "\n".join(errors)
+        else:
+            report += "No errors found."
+
+        # Send alert using Teams
+        teams_message = TeamsWebhookOperator(
+            task_id='send_teams_alert',
+            http_conn_id='teams_webhook',
+            message=report
         )
+        teams_message.execute(context={})
 
-        destination_folder = '/opt/airflow/good_data' if good_data_condition.all() else '/opt/airflow/bad_data'
-        filename = os.path.basename(file_path)
-        destination_path = os.path.join(destination_folder, filename)
-        shutil.move(file_path, destination_path)
-        logging.info(f"File has been moved to {destination_path}.")
+    @task
+    def split_and_save_data(file_path: str, is_valid: bool):
+        if is_valid:
+            destination_folder = '/opt/airflow/good_data'
+        else:
+            destination_folder = '/opt/airflow/bad_data'
+        
+        os.makedirs(destination_folder, exist_ok=True)
+        shutil.move(file_path, os.path.join(destination_folder, os.path.basename(file_path)))
 
-    # Define task dependencies
+    # Define task flow
     file_path = read_data()
-    validated_file_path = validate_data(file_path)
+    file_path, errors, is_valid = validate_data(file_path)
+    save_statistics(file_path, errors, is_valid)
+    send_alerts(file_path, errors)
+    split_and_save_data(file_path, is_valid)
 
-    # Use Airflow Task Flow API to manage branching
-    save_statistics(validated_file_path)
-    split_and_save_data(validated_file_path)
-    validated_file_path.on_failure_callback = send_alerts  # Trigger alert on validation failure
-
-# Instantiate the DAG
-data_ingestion_dag = my_data_ingestion_dag()
+data_ingestion_dag = data_ingestion_dag()
