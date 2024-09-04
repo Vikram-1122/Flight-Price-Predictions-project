@@ -19,7 +19,8 @@ default_args = {
     tags=['data_ingestion'],
     schedule_interval=timedelta(minutes=5),  # Run every 5 minutes
     start_date=days_ago(1),  # Start date set to 1 day ago
-    max_active_runs=1  # Ensure only one active run at a time
+    max_active_runs=1,  # Ensure only one active run at a time
+    default_args=default_args,
 )
 def my_data_ingestion_dag():
     
@@ -96,9 +97,11 @@ def my_data_ingestion_dag():
     # Define task dependencies
     file_path = read_data()
     validated_file_path = validate_data(file_path)
+
+    # Use Airflow Task Flow API to manage branching
     save_statistics(validated_file_path)
-    send_alerts()
     split_and_save_data(validated_file_path)
+    validated_file_path.on_failure_callback = send_alerts  # Trigger alert on validation failure
 
 # Instantiate the DAG
 data_ingestion_dag = my_data_ingestion_dag()
