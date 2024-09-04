@@ -1,12 +1,11 @@
 import logging
 import pandas as pd
 import os
-import sys
 import shutil
 from datetime import timedelta
 from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
-sys.path.append('..')
+
 # Default arguments for DAG
 default_args = {
     'owner': 'airflow',
@@ -88,7 +87,7 @@ def my_data_ingestion_dag():
             data['arrival_time'].isin(['Morning', 'Afternoon', 'Evening', 'Night', 'Early_Morning'])
         )
 
-        destination_folder = '../airflow-alpha/good_data' if good_data_condition.all() else '../airflow-alpha/bad_data'
+        destination_folder = '/opt/airflow/good_data' if good_data_condition.all() else '/opt/airflow/bad_data'
         filename = os.path.basename(file_path)
         destination_path = os.path.join(destination_folder, filename)
         shutil.move(file_path, destination_path)
