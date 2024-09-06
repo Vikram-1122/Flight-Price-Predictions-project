@@ -1,8 +1,8 @@
-﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
-271323,Air_India,AI-770,Kolkata,Night,one,Morning,Hyderabad,Business,14,0,52063
+Unnamed: 0,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
+271323,Air_India,AI-770,Kolkata,Night,one,Morning,Hyderabad,Business,14.0,0,52063
 271324,Air_India,AI-770,Kolkata,Night,one,Morning,Hyderabad,Business,15.42,1,52063
 271325,Air_India,AI-763,Kolkata,Early_Morning,one,Night,Hyderabad,Business,16.58,2,52063
-271326,Air_India,AI-768,Kolkata,Afternoon,one,Morning,Hyderabad,Business,19,3,52063
+271326,Air_India,AI-768,Kolkata,Afternoon,one,Morning,Hyderabad,Business,19.0,3,52063
 271327,Air_India,AI-768,Kolkata,Afternoon,one,Morning,Hyderabad,Business,20.42,4,52063
 271328,Air_India,AI-770,Kolkata,Night,one,Evening,Hyderabad,Business,22.83,5,52063
 271329,Air_India,AI-402,Kolkata,Morning,one,Morning,Hyderabad,Business,24.08,6,52063
@@ -29,7 +29,7 @@
 271350,Vistara,UK-774,Kolkata,Night,one,Night,Hyderabad,Business,24.33,9,49207
 271351,Vistara,UK-772,Kolkata,Morning,one,Afternoon,Hyderabad,Business,25.83,10,49207
 271352,Vistara,UK-776,Kolkata,Evening,one,Night,Hyderabad,Business,27.33,11,49207
-271353,Air_India,AI-773,Kolkata,Evening,one,Early_Morning,Hyderabad,Business,14,12,49151
+271353,Air_India,AI-773,Kolkata,Evening,one,Early_Morning,Hyderabad,Business,14.0,12,49151
 271354,Vistara,UK-720,Kolkata,Early_Morning,one,Afternoon,Hyderabad,Business,5.42,13,52175
 271355,Vistara,UK-720,Kolkata,Early_Morning,one,Evening,Hyderabad,Business,9.83,14,52175
 271356,Vistara,UK-720,Kolkata,Early_Morning,one,Evening,Hyderabad,Business,12.75,15,52175
@@ -42,12 +42,12 @@
 271363,Air_India,AI-402,Kolkata,Morning,one,Evening,Hyderabad,Business,8.92,22,52063
 271364,Air_India,AI-763,Kolkata,Early_Morning,one,Evening,Hyderabad,Business,12.33,23,52063
 271365,Air_India,AI-402,Kolkata,Morning,one,Night,Hyderabad,Business,13.17,24,52063
-271366,Air_India,AI-770,Kolkata,Night,one,Morning,Hyderabad,Business,14,25,52063
+271366,Air_India,AI-770,Kolkata,Night,one,Morning,Hyderabad,Business,14.0,25,52063
 271367,Air_India,AI-770,Kolkata,Night,one,Morning,Hyderabad,Business,15.42,26,52063
 271368,Air_India,AI-763,Kolkata,Early_Morning,one,Night,Hyderabad,Business,16.58,27,52063
-271369,Air_India,AI-768,Kolkata,Afternoon,one,Morning,Hyderabad,Business,19,28,52063
+271369,Air_India,AI-768,Kolkata,Afternoon,one,Morning,Hyderabad,Business,19.0,28,52063
 271370,Air_India,AI-768,Kolkata,Afternoon,one,Morning,Hyderabad,Business,20.42,29,52063
-271371,Air_India,AI-424,Kolkata,Afternoon,one,Morning,Hyderabad,Business,21,30,52063
+271371,Air_India,AI-424,Kolkata,Afternoon,one,Morning,Hyderabad,Business,21.0,30,52063
 271372,Air_India,AI-424,Kolkata,Afternoon,one,Morning,Hyderabad,Business,22.42,31,52063
 271373,Air_India,AI-770,Kolkata,Night,one,Evening,Hyderabad,Business,22.83,32,52063
 271374,Air_India,AI-402,Kolkata,Morning,one,Morning,Hyderabad,Business,24.08,33,52063
@@ -100,10 +100,10 @@
 271421,Air_India,AI-402,Kolkata,Morning,one,Evening,Hyderabad,Business,8.92,26,52063
 271422,Air_India,AI-763,Kolkata,Early_Morning,one,Evening,Hyderabad,Business,12.33,27,52063
 271423,Air_India,AI-402,Kolkata,Morning,one,Night,Hyderabad,Business,13.17,28,52063
-271424,Air_India,AI-770,Kolkata,Night,one,Morning,Hyderabad,Business,14,29,52063
+271424,Air_India,AI-770,Kolkata,Night,one,Morning,Hyderabad,Business,14.0,29,52063
 271425,Air_India,AI-770,Kolkata,Night,one,Morning,Hyderabad,Business,15.42,30,52063
 271426,Air_India,AI-763,Kolkata,Early_Morning,one,Night,Hyderabad,Business,16.58,31,52063
-271427,Air_India,AI-768,Kolkata,Afternoon,one,Morning,Hyderabad,Business,19,32,52063
+271427,Air_India,AI-768,Kolkata,Afternoon,one,Morning,Hyderabad,Business,19.0,32,52063
 271428,Air_India,AI-768,Kolkata,Afternoon,one,Morning,Hyderabad,Business,20.42,33,52063
 271429,Air_India,AI-770,Kolkata,Night,one,Evening,Hyderabad,Business,22.83,34,52063
 271430,Air_India,AI-770,Kolkata,Night,one,Night,Hyderabad,Business,24.08,35,52063

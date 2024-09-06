@@ -1,4 +1,4 @@
-﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
+Unnamed: 0,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
 1,GO_FIRST,G8-237,Delhi,Afternoon,one,Night,Mumbai,Economy,9.25,9,5954
 2,GO_FIRST,G8-103,Delhi,Evening,one,Early_Morning,Mumbai,Economy,12.33,9,5954
 3,GO_FIRST,G8-719,Delhi,Early_Morning,one,Night,Mumbai,Economy,14.25,9,5954

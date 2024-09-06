@@ -1,5 +1,5 @@
-﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
-1,Vistara,UK-673,Delhi,Afternoon,one,Evening,Mumbai,Economy,5,2,19343
+Unnamed: 0,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
+1,Vistara,UK-673,Delhi,Afternoon,one,Evening,Mumbai,Economy,5.0,2,19343
 2,Vistara,UK-627,Delhi,Afternoon,one,Afternoon,Mumbai,Economy,26.67,2,19553
 3,Vistara,UK-705,Delhi,Early_Morning,one,Afternoon,Mumbai,Economy,6.5,2,19815
 4,Air_India,AI-406,Delhi,Morning,one,Afternoon,Mumbai,Economy,4.83,2,20445
@@ -8,7 +8,7 @@
 7,GO_FIRST,G8-286,Delhi,Morning,one,Evening,Mumbai,Economy,7.5,2,23281
 8,GO_FIRST,G8-286,Delhi,Morning,one,Evening,Mumbai,Economy,8.83,2,23281
 9,Vistara,UK-847,Delhi,Morning,one,Afternoon,Mumbai,Economy,27.58,2,24488
-10,Air_India,AI-411,Delhi,Early_Morning,one,Afternoon,Mumbai,Economy,8,2,24855
+10,Air_India,AI-411,Delhi,Early_Morning,one,Afternoon,Mumbai,Economy,8.0,2,24855
 11,Vistara,UK-737,Delhi,Afternoon,one,Night,Mumbai,Economy,28.42,2,25905
 12,Vistara,UK-705,Delhi,Early_Morning,one,Night,Mumbai,Economy,13.83,2,29160
 13,Air_India,AI-877,Delhi,Morning,one,Evening,Mumbai,Economy,6.42,2,29580

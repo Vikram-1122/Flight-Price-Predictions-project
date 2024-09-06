@@ -1,8 +1,8 @@
-﻿,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
+Unnamed: 0,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
 1,Air_India,AI-453,Delhi,Early_Morning,one,Afternoon,Mumbai,Economy,8.83,2,11900
 2,SpiceJet,SG-2976,Delhi,Evening,two,Night,Mumbai,Economy,4.5,1,12123
 3,SpiceJet,SG-2976,Delhi,Evening,one,Morning,Mumbai,Economy,15.25,1,12123
-4,Air_India,AI-504,Delhi,Night,zero,Morning,Mumbai,Economy,11,10,12150
+4,Air_India,AI-504,Delhi,Night,zero,Morning,Mumbai,Economy,11.0,10,12150
 5,Air_India,AI-502,Delhi,Afternoon,one,Morning,Mumbai,Economy,19.08,1,12150
 6,Air_India,AI-506,Delhi,Morning,zero,Morning,Mumbai,Economy,22.83,11,12150
 7,Air_India,AI-803,Delhi,Early_Morning,one,Morning,Mumbai,Economy,26.42,12,12150

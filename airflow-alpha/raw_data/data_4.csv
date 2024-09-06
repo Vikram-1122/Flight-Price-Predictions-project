@@ -1,0 +1,8 @@
+Unnamed: 0,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
+1,Indigo,6E-5041,Delhi,Evening,zero,Night,Mumbai,Economy,2.17,7,10470
+2,GO_FIRST,G8-165,Delhi,Early_Morning,one,Afternoon,Mumbai,Economy,8.0,1,10575
+3,Indigo,6E-2373,Delhi,Afternoon,one,Evening,Mumbai,Economy,6.0,2,10838
+4,Vistara,UK-813,Delhi,Evening,zero,Morning,Mumbai,Economy,14.67,1,12150
+5,Vistara,UK-817,Delhi,Evening,one,Morning,Mumbai,Economy,16.17,3,12150
+6,Vistara,UK-819,Delhi,Afternoon,zero,Morning,Mumbai,Economy,18.0,1,12150
+7,Vistara,UK-801,Delhi,Morning,one,Morning,Mumbai,Economy,23.17,11,12150
