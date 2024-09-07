@@ -1,37 +1,70 @@
-import sys
-import pickle
-from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
-from datetime import datetime
 import os
+import requests
+import pandas as pd
+from airflow.decorators import dag, task
+from airflow.exceptions import AirflowSkipException
+from airflow.utils.dates import days_ago
+from datetime import timedelta
 
-sys.path.append('..')
 default_args = {
     'owner': 'airflow',
-    'start_date': datetime(2023, 8, 1),
-    'retries': 1
+    'retries': 1,
+    'retry_delay': timedelta(minutes=1)
 }
 
-def check_for_new_data():
-    good_data_folder = '..\dsp-skyprix\good_data'  # Replace with actual path
-    files = os.listdir(good_data_folder)
-    if files:
-        return files
-    return []
+# Path to track processed files
+processed_files_tracker = '/opt/airflow/processed_files_tracker.txt'
 
-def make_predictions(file_paths):
-    model_path = '../price_prediction_model.pkl'
-    with open(model_path, 'rb') as model_file:
-        model = pickle.load(model_file)
-    
-    for file_path in file_paths:
-        data = pd.read_csv(file_path)
-        predictions = model.predict(data[['source_city', 'destination_city']])  # Replace with actual feature names
-        data['predictions'] = predictions
-        data.to_csv(file_path.replace('good_data', 'predicted_data'), index=False)
+def get_processed_files():
+    """Read the list of processed files from the tracker."""
+    if os.path.exists(processed_files_tracker):
+        with open(processed_files_tracker, 'r') as f:
+            processed_files = f.read().splitlines()
+    else:
+        processed_files = []
+    return processed_files
 
-with DAG('prediction_dag', default_args=default_args, schedule_interval='@hourly') as dag:
-    check_for_new_data_task = PythonOperator(task_id='check_for_new_data', python_callable=check_for_new_data)
-    make_predictions_task = PythonOperator(task_id='make_predictions', python_callable=make_predictions)
+def update_processed_files(new_file):
+    """Update the tracker with the newly processed file."""
+    with open(processed_files_tracker, 'a') as f:
+        f.write(f"{new_file}\n")
 
-    check_for_new_data_task >> make_predictions_task
+@dag(default_args=default_args, schedule_interval='*/2 * * * *', start_date=days_ago(1), catchup=False, description='Scheduled Prediction DAG')
+def prediction_dag():
+    @task
+    def check_for_new_data():
+        good_data_folder = '/opt/airflow/good_data'  # Replace with the actual path
+        all_files = [os.path.join(good_data_folder, f) for f in os.listdir(good_data_folder) if f.endswith('.csv')]
+        processed_files = get_processed_files()
+        
+        # Identify the first new file by excluding processed files
+        new_files = [file for file in all_files if file not in processed_files]
+        
+        if not new_files:
+            raise AirflowSkipException("No new files to process. Skipping DAG run.")
+        
+        # Return only the first new file to process
+        return new_files[0]
+
+    @task
+    def make_predictions(file_path: str):
+        model_api_url = 'http://localhost:8000/predict'  # Replace with your actual model API endpoint
+        
+        try:
+            files = {'file': open(file_path, 'rb')}
+            response = requests.post(model_api_url, files=files)
+            response.raise_for_status()
+            predictions = response.json()
+            # You can save or log predictions as needed
+            print(f"Predictions for {file_path}: {predictions}")
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to get predictions for {file_path}: {e}")
+
+        # Update processed files tracker for the single file processed
+        update_processed_files(file_path)
+
+    # Task dependencies
+    new_file = check_for_new_data()
+    make_predictions(new_file)
+
+dag_instance = prediction_dag()
