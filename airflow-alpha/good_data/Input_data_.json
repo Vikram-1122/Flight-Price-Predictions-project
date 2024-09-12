@@ -1,0 +1,18 @@
+[
+    {
+        "source_city": "New York",
+        "destination_city": "London"
+    },
+    {
+        "source_city": "Los Angeles",
+        "destination_city": "Tokyo"
+    },
+    {
+        "source_city": "Chicago",
+        "destination_city": "Paris"
+    },
+    {
+        "source_city": "Houston",
+        "destination_city": "Berlin"
+    }
+]
