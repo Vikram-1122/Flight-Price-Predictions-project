@@ -22,8 +22,8 @@ def predict(features):
 # Example usage
 if __name__ == "__main__":
     # Replace with actual feature values
-    example_features = [2.25, 12, "Vistara", "Delhi", "Morning", "zero", 
-                        "Afternoon", "Mumbai", "Economy"]
+    example_features = [10, 30, "Vistara", "Delhi", "Morning", "One", 
+                        "Afternoon", "Mumbai", "Business"]
     
     predicted_price = predict(example_features)
     print(f"Predicted flight price: {predicted_price}")

@@ -66,8 +66,14 @@ def prediction_page():
                 response = requests.post(PREDICT_JSON_URL, json=data)
                 response.raise_for_status()
                 result = response.json()
+
+                input_df = pd.DataFrame([data])
+                result_df = pd.DataFrame([result])
+                
+                st.write("Input Values:")
+                st.table(input_df)
                 st.write("Prediction:")
-                st.table(pd.DataFrame([result]))
+                st.table(result_df)
             except requests.exceptions.HTTPError as http_err:
                 st.write(f"HTTP error occurred: {http_err}")
             except Exception as err:
