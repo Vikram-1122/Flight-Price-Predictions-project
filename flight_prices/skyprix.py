@@ -5,7 +5,8 @@ from datetime import datetime
 from io import StringIO
 
 # FastAPI endpoint URLs
-PREDICT_URL = 'http://localhost:8000/predict'
+PREDICT_FILE_URL = 'http://localhost:8000/predict-file'
+PREDICT_JSON_URL = 'http://localhost:8000/predict-json'
 PAST_PREDICT_URL = 'http://localhost:8000/past-predictions'
 
 def add_background():
@@ -60,42 +61,45 @@ def prediction_page():
             'price': price
         }
 
-        # Send POST request to FastAPI server with JSON data
-        response = requests.post(PREDICT_URL, json=data)
-        if response.status_code == 200:
-            result = response.json()
-            table_data = {**data, **result}
-            st.write("Prediction:")
-            st.table(pd.DataFrame([table_data]))
-        else:
-            st.write(f"Error making prediction: {response.text}")
+        with st.spinner("Making prediction..."):
+            try:
+                response = requests.post(PREDICT_JSON_URL, json=data)
+                response.raise_for_status()
+                result = response.json()
+                st.write("Prediction:")
+                st.table(pd.DataFrame([result]))
+            except requests.exceptions.HTTPError as http_err:
+                st.write(f"HTTP error occurred: {http_err}")
+            except Exception as err:
+                st.write(f"An error occurred: {err}")
 
     st.subheader("Multiple Flight Predictions")
     file = st.file_uploader("Upload CSV file", type=["csv"])
 
     if file is not None:
         try:
-            # Check if the file has content
             file_content = file.read().decode('utf-8')
             if not file_content.strip():
                 st.write("Uploaded file is empty.")
             else:
-                # Rewind the file to the beginning
                 file.seek(0)
                 df = pd.read_csv(StringIO(file_content))
                 st.write("CSV Content:")
                 st.write(df.head())  # Display the first few rows for debugging
 
-                # Send POST request to FastAPI server with file
-                response = requests.post(PREDICT_URL, files={"file": file})
-                if response.status_code == 200:
-                    result = response.json()
-                    predictions = result.get('predictions', [])
-                    df['Prediction'] = predictions
-                    st.write("Predictions:")
-                    st.table(df)
-                else:
-                    st.write(f"Error making prediction: {response.text}")
+                with st.spinner("Processing file..."):
+                    try:
+                        response = requests.post(PREDICT_FILE_URL, files={"file": file})
+                        response.raise_for_status()
+                        result = response.json()
+                        predictions = result.get('predictions', [])
+                        df['Prediction'] = predictions
+                        st.write("Predictions:")
+                        st.table(df)
+                    except requests.exceptions.HTTPError as http_err:
+                        st.write(f"HTTP error occurred: {http_err}")
+                    except Exception as err:
+                        st.write(f"An error occurred: {err}")
         except pd.errors.EmptyDataError:
             st.write("No columns to parse from file. Please check the file format.")
         except Exception as e:
@@ -114,17 +118,20 @@ def show_past_predictions_page():
             "prediction_source": prediction_source
         }
 
-        response = requests.get(PAST_PREDICT_URL, params=params)
-
-        if response.status_code == 200:
-            past_predictions = response.json()
-            if past_predictions:
-                st.write("Past Predictions:")
-                st.table(pd.DataFrame(past_predictions))
-            else:
-                st.write("No predictions found for the given date range and source.")
-        else:
-            st.write(f"Error retrieving past predictions: {response.text}")
+        with st.spinner("Retrieving past predictions..."):
+            try:
+                response = requests.get(PAST_PREDICT_URL, params=params)
+                response.raise_for_status()
+                past_predictions = response.json()
+                if past_predictions:
+                    st.write("Past Predictions:")
+                    st.table(pd.DataFrame(past_predictions))
+                else:
+                    st.write("No predictions found for the given date range and source.")
+            except requests.exceptions.HTTPError as http_err:
+                st.write(f"HTTP error occurred: {http_err}")
+            except Exception as err:
+                st.write(f"An error occurred: {err}")
 
 def main():
     st.set_page_config(layout="wide")
