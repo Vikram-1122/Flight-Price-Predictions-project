@@ -11,14 +11,14 @@ import uvicorn
 
 app = FastAPI()
 
-# Configure logging
+# logs configuration for better understanding of errors.
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Initialize the database
 init_db()
 
-# Pydantic model for single JSON input
+# pydantic model for json input model.
 class SinglePredictionInput(BaseModel):
     airline: str
     flight: str

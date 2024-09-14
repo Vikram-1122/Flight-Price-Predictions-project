@@ -6,13 +6,13 @@ def get_preprocessor():
                         'arrival_time', 'destination_city', 'travel_class']
     numerical_cols = ['duration', 'days_left']
 
-    # Preprocessing for numerical data
+    # preprocess the numerical columns.
     numerical_transformer = 'passthrough'
 
-    # Preprocessing for categorical data
+    # Preprocess the categorical columns.
     categorical_transformer = OneHotEncoder(handle_unknown='ignore')
 
-    # Bundle preprocessing for numerical and categorical data
+    # column transformation of both numerical and categorical columns.
     preprocessor = ColumnTransformer(
         transformers=[
             ('num', numerical_transformer, numerical_cols),

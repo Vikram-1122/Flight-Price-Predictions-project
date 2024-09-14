@@ -1,12 +1,12 @@
 import joblib
 import pandas as pd
 
-# Load the trained model
+# Load the model
 model_filename = 'flight_price_prediction_model.pkl'
 pipeline = joblib.load(model_filename)
 
 def predict(features):
-    # Convert features to DataFrame
+    
 
     column_names = ['duration', 'days_left'  , 'airline', 'source_city', 'departure_time', 'stops', 
                         'arrival_time', 'destination_city', 'travel_class']
@@ -21,7 +21,7 @@ def predict(features):
 
 # Example usage
 if __name__ == "__main__":
-    # Replace with actual feature values
+    # Here you can replace them with your own feature values.
     example_features = [10, 30, "Vistara", "Delhi", "Morning", "One", 
                         "Afternoon", "Mumbai", "Business"]
     

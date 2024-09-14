@@ -20,7 +20,7 @@ default_args = {
 @dag(
     dag_id='data_ingestion_dag',
     description='A DAG for ingesting, validating, and processing data',
-    schedule_interval='0 */1 * * *',  # Every 1 hours
+    schedule_interval='0 */1 * * *',  # for every one hour
     start_date=days_ago(1),
     max_active_runs=1,
     default_args=default_args,
@@ -32,7 +32,7 @@ def my_data_ingestion_dag():
     def read_data() -> str:
         raw_data_folder = '/opt/airflow/raw_data'
 
-        # List files in the raw data folder
+        # here it list the raw_data files
         files = [f for f in os.listdir(raw_data_folder) if f.endswith('.csv') and not f.startswith('.ipynb_checkpoints')]
         logging.info(f"Files found in raw data folder: {files}")
 
@@ -52,7 +52,7 @@ def my_data_ingestion_dag():
         
         data = pd.read_csv(file_path)
         
-        # Define expected data types for critical columns
+        # critical column datatypes defined.
         critical_columns = {
             'airline': 'object',
             'flight': 'object',
@@ -67,12 +67,12 @@ def my_data_ingestion_dag():
             'arrival_time': 'object'
         }
         
-        # Check for missing values in critical columns
+        # check missing values of critical columns.
         if data[list(critical_columns.keys())].isnull().values.any():
             logging.error("Critical columns contain missing values!")
             return "Failed"
         
-        # Check data types for critical columns
+        # Check data types of critical columns
         for column, expected_type in critical_columns.items():
             if data[column].dtype != expected_type:
                 logging.error(f"Column '{column}' should be of type {expected_type}, but found type {data[column].dtype}.")
@@ -101,12 +101,12 @@ def my_data_ingestion_dag():
 
     @task
     def save_statistics(file_path: str, status: str):
-        # Retrieve PostgreSQL connection details from Airflow
+        # get PostgreSQL connection details from airflow.
         conn = BaseHook.get_connection('postgres_stats')
         db_url = f"postgresql+psycopg2://{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}"
         engine = create_engine(db_url)
         
-        # Create the table if it does not exist
+        # create table if it doesn't exist.
         with engine.connect() as connection:
             connection.execute("""
             CREATE TABLE IF NOT EXISTS statistics (
@@ -124,11 +124,11 @@ def my_data_ingestion_dag():
             message = f"File {file_path} processed with status: {status}"
             logging.info(message)
 
-        # Append log details to the statistics table
+        # Append log details to the save_statistics table
         try:
             with engine.connect() as connection:
                 connection.execute("""
-                INSERT INTO statistics (timestamp, file_path, status, message)
+                INSERT INTO save_statistics (timestamp, file_path, status, message)
                 VALUES (%s, %s, %s, %s)
                 """, (datetime.now(), file_path, status, message))
         except Exception as e:

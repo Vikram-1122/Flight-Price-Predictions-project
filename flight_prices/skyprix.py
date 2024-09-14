@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime
 from io import StringIO
 
-# FastAPI endpoint URLs
+# endpoint URLs of FastAPI.
 PREDICT_FILE_URL = 'http://localhost:8000/predict-file'
 PREDICT_JSON_URL = 'http://localhost:8000/predict-json'
 PAST_PREDICT_URL = 'http://localhost:8000/past-predictions'
@@ -91,7 +91,7 @@ def prediction_page():
                 file.seek(0)
                 df = pd.read_csv(StringIO(file_content))
                 st.write("CSV Content:")
-                st.write(df.head())  # Display the first few rows for debugging
+                st.write(df.head())
 
                 with st.spinner("Processing file..."):
                     try:
