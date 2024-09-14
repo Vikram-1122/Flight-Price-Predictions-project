@@ -115,7 +115,7 @@ def show_past_predictions_page():
     st.header("Past Predictions Page")
     start_date = st.date_input("Start Date", value=datetime(2024, 8, 1))
     end_date = st.date_input("End Date", value=datetime.now())
-    prediction_source = st.selectbox("Prediction Source", ["all", "file_upload", "json_input"])
+    prediction_source = st.selectbox("Prediction Source", ["all", "webapp", "scheduled predictions"])
 
     if st.button("Retrieve Past Predictions"):
         params = {

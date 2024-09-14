@@ -111,7 +111,7 @@ async def predict_file(file: UploadFile = File(...), db: Session = Depends(get_d
                 days_left=features.get('days_left', 0),
                 price=features.get('price', 0),
                 prediction_result=prediction,
-                prediction_source='file_upload'
+                prediction_source='webapp'
             )
             db.add(db_prediction)
         db.commit()
@@ -160,7 +160,7 @@ async def predict_json(input: SinglePredictionInput, db: Session = Depends(get_d
             days_left=features.get('days_left', 0),
             price=features.get('price', 0),
             prediction_result=predictions[0],
-            prediction_source='json_input'
+            prediction_source='webapp'
         )
         db.add(db_prediction)
         db.commit()
