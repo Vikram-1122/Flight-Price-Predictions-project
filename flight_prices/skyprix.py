@@ -4,9 +4,8 @@ import pandas as pd
 from datetime import datetime
 from io import StringIO
 
-# endpoint URLs of FastAPI.
-PREDICT_FILE_URL = 'http://localhost:8000/predict-file'
-PREDICT_JSON_URL = 'http://localhost:8000/predict-json'
+# Endpoint URLs of FastAPI.
+PREDICT = 'http://localhost:8000/predict'
 PAST_PREDICT_URL = 'http://localhost:8000/past-predictions'
 
 def add_background():
@@ -35,16 +34,16 @@ def prediction_page():
 
     # Input fields for flight features
     airline = st.selectbox("Airline", ["AirAsia", "SpiceJet", "Vistara", "GO_FIRST", "Indigo", "Air_India"])
-    flight = st.text_input("Flight Number")
+    flight = st.text_input("Flight Number", value = "FN1234")
     source_city = st.selectbox("Source City", ["Mumbai", "Delhi", "Hyderabad", "Bangalore", "Kolkata", "Chennai"])
     departure_time = st.selectbox("Departure Time", ["Early_Morning", "Morning", "Afternoon", "Evening", "Night"])
     stops = st.selectbox("Stops", ["zero", "one", "two", "three", "four"])
-    arrival_time = st.selectbox("Arrival Time", ["Early_Morning", "Morning", "Afternoon", "Evening", "Night"])
-    destination_city = st.selectbox("Destination City", ["Mumbai", "Delhi", "Hyderabad", "Bangalore", "Kolkata", "Chennai"])
+    arrival_time = st.selectbox("Arrival Time", [ "Morning","Early_Morning", "Afternoon", "Evening", "Night"])
+    destination_city = st.selectbox("Destination City", ["Delhi", "Hyderabad", "Bangalore", "Kolkata", "Chennai","Mumbai"])
     travel_class = st.selectbox("Travel Class", ["Economy", "Business", "First"])
-    duration = st.number_input("Duration (in hours)", min_value=0.0, step=0.1)
+    duration = st.number_input("Duration (in hours)", min_value=2.0, step=0.1)
     days_left = st.number_input("Days Left to Departure", min_value=0, step=1)
-    price = st.number_input("Price (in your currency)", min_value=0, step=100)
+    price = st.number_input("Price (in your currency)", min_value=2500, step=100)
 
     if st.button("Predict"):
         data = {
@@ -63,12 +62,12 @@ def prediction_page():
 
         with st.spinner("Making prediction..."):
             try:
-                response = requests.post(PREDICT_JSON_URL, json=data)
+                response = requests.post(PREDICT, json=data)
                 response.raise_for_status()
                 result = response.json()
 
                 input_df = pd.DataFrame([data])
-                result_df = pd.DataFrame([result])
+                result_df = pd.DataFrame([result['predictions']])
                 
                 st.write("Input Values:")
                 st.table(input_df)
@@ -93,23 +92,22 @@ def prediction_page():
                 st.write("CSV Content:")
                 st.write(df.head())
 
-                with st.spinner("Processing file..."):
-                    try:
-                        response = requests.post(PREDICT_FILE_URL, files={"file": file})
-                        response.raise_for_status()
-                        result = response.json()
-                        predictions = result.get('predictions', [])
-                        df['Prediction'] = predictions
-                        st.write("Predictions:")
-                        st.table(df)
-                    except requests.exceptions.HTTPError as http_err:
-                        st.write(f"HTTP error occurred: {http_err}")
-                    except Exception as err:
-                        st.write(f"An error occurred: {err}")
-        except pd.errors.EmptyDataError:
-            st.write("No columns to parse from file. Please check the file format.")
+                st.subheader("Processing file...")
+                try:
+                    response = requests.post(PREDICT, files={"file": file})
+                    response.raise_for_status()
+                    result = response.json()
+                    predictions = result.get('predictions', [])
+                    df['Prediction'] = predictions
+
+                    st.write("Predictions:")
+                    st.write(df)
+                except requests.exceptions.HTTPError as http_err:
+                    st.write(f"HTTP error occurred: {http_err}")
+                except Exception as err:
+                    st.write(f"An error occurred: {err}")
         except Exception as e:
-            st.write(f"An error occurred: {str(e)}")
+            st.write(f"An error occurred while processing the file: {e}")
 
 def show_past_predictions_page():
     st.header("Past Predictions Page")
@@ -138,6 +136,7 @@ def show_past_predictions_page():
                 st.write(f"HTTP error occurred: {http_err}")
             except Exception as err:
                 st.write(f"An error occurred: {err}")
+
 
 def main():
     st.set_page_config(layout="wide")
