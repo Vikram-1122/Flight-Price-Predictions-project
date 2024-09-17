@@ -163,3 +163,4 @@ cython_debug/
 airflow-alpha/airflow/logs/
 airflow-aplha/logs/
 airflow-alpha/logs/scheduler/latest
+.idea/
