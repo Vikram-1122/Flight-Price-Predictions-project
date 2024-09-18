@@ -1,0 +1,9 @@
+Unnamed: 0,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
+100212,AirAsia,I5-339,Bangalore,Night,zero,Late_Night,Mumbai,Economy,1.83,36,2201
+100214,Indigo,6E-5344,Bangalore,Night,zero,Late_Night,Mumbai,Economy,1.92,36,2201
+100219,AirAsia,I5-1782,Bangalore,Night,one,Late_Night,Mumbai,Economy,5.67,36,2203
+100220,AirAsia,I5-722,Bangalore,Late_Night,one,Early_Morning,Mumbai,Economy,6.17,36,2203
+100234,Indigo,0.00E+00,Bangalore,Evening,one,Late_Night,Mumbai,Economy,4.83,36,3957
+100235,Indigo,0.00E+00,Bangalore,Evening,one,Late_Night,Mumbai,Economy,7.08,36,3957
+100236,Air_India,AI-9547,Bangalore,Evening,one,Late_Night,Mumbai,Economy,5.17,36,3961
+100245,GO_FIRST,G8-285,Bangalore,Afternoon,one,Late_Night,Mumbai,Economy,9.58,36,4096

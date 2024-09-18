@@ -1,0 +1,8 @@
+Unnamed: 0,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
+100255,Indigo,6E-6017,Bangalore,Evening,one,Late_Night,Mumbai,Economy,6.08,36,4234
+100258,GO_FIRST,G8-803,Bangalore,Evening,one,Late_Night,Mumbai,Economy,7.17,36,4354
+100261,Indigo,6E-806,Bangalore,Evening,one,Late_Night,Mumbai,Economy,7.5,36,4435
+100277,AirAsia,I5-972,Bangalore,Evening,two_or_more,Late_Night,Mumbai,Economy,10.0,36,5299
+100287,Air_India,AI-748,Bangalore,Late_Night,one,Afternoon,Mumbai,Economy,9.75,36,5850
+100288,Air_India,AI-748,Bangalore,Late_Night,one,Evening,Mumbai,Economy,15.17,36,5850
+100309,Air_India,AI-748,Bangalore,Late_Night,one,Night,Mumbai,Economy,17.42,36,6192

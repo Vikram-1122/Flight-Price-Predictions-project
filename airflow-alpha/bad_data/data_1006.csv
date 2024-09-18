@@ -1,0 +1,5 @@
+Unnamed: 0,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
+100725,Air_India,AI-9547,Bangalore,Evening,one,Late_Night,Mumbai,Economy,5.17,38,6901
+100735,Indigo,0.00E+00,Bangalore,Evening,one,Late_Night,Mumbai,Economy,4.83,38,7220
+100736,Indigo,6E-806,Bangalore,Evening,one,Late_Night,Mumbai,Economy,7.5,38,7220
+100746,GO_FIRST,G8-285,Bangalore,Afternoon,one,Late_Night,Mumbai,Economy,9.58,38,9306

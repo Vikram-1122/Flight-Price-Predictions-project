@@ -1,0 +1,4 @@
+Unnamed: 0,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
+10028,GO_FIRST,G8-2513,Delhi,Evening,one,Late_Night,Bangalore,Economy,7.5,1,12361
+10051,AirAsia,I5-792,Delhi,Afternoon,one,Late_Night,Bangalore,Economy,11.58,1,16210
+10052,AirAsia,I5-783,Delhi,Early_Morning,one,Late_Night,Bangalore,Economy,17.25,1,16210
