@@ -62,7 +62,7 @@ def prediction_page():
 
         with st.spinner("Making prediction..."):
             try:
-                response = requests.post(PREDICT, json=data)
+                response = requests.post("http://localhost:8000/predict", json=data)
                 response.raise_for_status()
                 result = response.json()
 

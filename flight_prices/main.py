@@ -1,3 +1,4 @@
+from typing import Union
 from fastapi import FastAPI, UploadFile, File, HTTPException, Body, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -5,12 +6,14 @@ import pandas as pd
 import joblib
 from io import StringIO
 from datetime import datetime
+from db import Prediction, get_db
 import logging
-from db import Prediction, get_db, init_db
-import uvicorn
+
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn")
+logging.basicConfig(level=logging.INFO)
+
 
 class SinglePredictionInput(BaseModel):
     airline: str
@@ -25,76 +28,60 @@ class SinglePredictionInput(BaseModel):
     days_left: int
     price: int
 
-def handle_file(file: UploadFile):
+# Utility functions to handle file and JSON input
+def handle_file(file: UploadFile) -> pd.DataFrame:
     file_content = file.file.read().decode('utf-8')
     if not file_content.strip():
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
     df = pd.read_csv(StringIO(file_content))
     return df
 
-def handle_json(input: SinglePredictionInput):
+def handle_json(input: SinglePredictionInput) -> pd.DataFrame:
     df = pd.DataFrame([input.dict()])
     return df
 
 @app.post("/predict")
-async def predict(file: UploadFile = File(None), input: SinglePredictionInput = Body(None), db: Session = Depends(get_db)):
+async def predict(
+    file: UploadFile = File(None),
+    input: Union[SinglePredictionInput, None] = Body(None),
+    db: Session = Depends(get_db)
+):
     logger.info(f"Received file: {file.filename if file else 'None'}")
     logger.info(f"Received JSON input: {input if input else 'None'}")
 
+    # Ensure either file or JSON input is provided
+    if file and input:
+        raise HTTPException(status_code=400, detail="Provide either a file or JSON input, not both.")
+    
     if file:
         try:
-            X = handle_file(file)
-        except HTTPException as e:
-            logger.error(f"Input processing error: {e.detail}")
-            raise e
+            df = handle_file(file)
+        except Exception as e:
+            logger.error(f"File processing error: {str(e)}")
+            raise HTTPException(status_code=400, detail="Error processing the uploaded file.")
     elif input:
         try:
-            X, _ = handle_json(input)
-        except HTTPException as e:
-            logger.error(f"Input processing error: {e.detail}")
-            raise e
+            df = handle_json(input)
+        except Exception as e:
+            logger.error(f"JSON processing error: {str(e)}")
+            raise HTTPException(status_code=400, detail="Error processing JSON input.")
     else:
         raise HTTPException(status_code=400, detail="No file or JSON input provided.")
 
+    # Load the model and make predictions
     pipeline_filename = 'flight_price_prediction_model.pkl'
     try:
         pipeline = joblib.load(pipeline_filename)
     except FileNotFoundError:
-        logger.error("Pipeline file not found.")
-        raise HTTPException(status_code=500, detail="Pipeline file not found")
+        logger.error("Prediction model not found.")
+        raise HTTPException(status_code=500, detail="Prediction model not available.")
 
-    try:
-        predictions = pipeline.predict(X).tolist()
-    except Exception as e:
-        logger.error(f"Error in preprocessing or prediction: {str(e)}")
-        raise HTTPException(status_code=400, detail=f"Error in preprocessing or prediction: {str(e)}")
+    # Make predictions using the DataFrame
+    predictions = pipeline.predict(df)
+    
+    # Assuming you want to return predictions as a JSON response
+    return {"predictions": predictions.tolist()}
 
-    try:
-        for i in range(len(predictions)):
-            features = X.iloc[i].to_dict()
-            prediction = predictions[i]
-            db_prediction = Prediction(
-                prediction_date=datetime.now().date(),
-                airline=features.get('airline', ''),
-                flight=features.get('flight', ''),
-                source_city=features.get('source_city', ''),
-                departure_time=features.get('departure_time', ''),
-                stops=features.get('stops', ''),
-                arrival_time=features.get('arrival_time', ''),
-                destination_city=features.get('destination_city', ''),
-                travel_class=features.get('travel_class', ''),
-                duration=features.get('duration', 0.0),
-                days_left=features.get('days_left', 0),
-                price=features.get('price', 0),
-                prediction_result=prediction,
-                prediction_source='webapp'
-            )
-            db.add(db_prediction)
-        db.commit()
-    except Exception as e:
-        logger.error(f"Error saving predictions to database: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error saving predictions to the database")
-    return {"predictions": predictions}
  
 
 @app.get("/past-predictions")
