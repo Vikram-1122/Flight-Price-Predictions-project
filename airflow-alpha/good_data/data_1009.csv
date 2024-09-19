@@ -1,4 +1,4 @@
-,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
+Unnamed: 0,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
 100953,AirAsia,I5-1561,Bangalore,Evening,zero,Night,Mumbai,Economy,1.75,40,2201
 100954,Indigo,6E-5365,Bangalore,Early_Morning,zero,Morning,Mumbai,Economy,1.83,40,2201
 100955,Indigo,6E-5323,Bangalore,Morning,zero,Morning,Mumbai,Economy,1.83,40,2201
@@ -7,8 +7,8 @@
 100958,AirAsia,I5-339,Bangalore,Night,zero,Late_Night,Mumbai,Economy,1.83,40,2201
 100959,GO_FIRST,G8-399,Bangalore,Night,zero,Night,Mumbai,Economy,1.92,40,2201
 100960,Indigo,6E-5344,Bangalore,Night,zero,Late_Night,Mumbai,Economy,1.92,40,2201
-100961,Indigo,6E-5203,Bangalore,Evening,zero,Night,Mumbai,Economy,2,40,2201
-100962,Indigo,6E-332,Bangalore,Night,zero,Night,Mumbai,Economy,2,40,2201
+100961,Indigo,6E-5203,Bangalore,Evening,zero,Night,Mumbai,Economy,2.0,40,2201
+100962,Indigo,6E-332,Bangalore,Night,zero,Night,Mumbai,Economy,2.0,40,2201
 100963,Indigo,6.00E-113,Bangalore,Morning,one,Afternoon,Mumbai,Economy,4.17,40,2201
 100964,Indigo,6.00E-113,Bangalore,Morning,one,Afternoon,Mumbai,Economy,5.83,40,2201
 100965,Indigo,6E-6445,Bangalore,Early_Morning,one,Afternoon,Mumbai,Economy,6.25,40,2201
@@ -18,7 +18,7 @@
 100969,AirAsia,I5-1782,Bangalore,Night,one,Late_Night,Mumbai,Economy,5.67,40,2203
 100970,AirAsia,I5-722,Bangalore,Late_Night,one,Early_Morning,Mumbai,Economy,6.08,40,2203
 100971,AirAsia,I5-749,Bangalore,Night,one,Early_Morning,Mumbai,Economy,8.17,40,2203
-100972,AirAsia,I5-972,Bangalore,Evening,two_or_more,Late_Night,Mumbai,Economy,10,40,2203
+100972,AirAsia,I5-972,Bangalore,Evening,two_or_more,Late_Night,Mumbai,Economy,10.0,40,2203
 100973,AirAsia,I5-1782,Bangalore,Night,one,Early_Morning,Mumbai,Economy,10.92,40,2203
 100974,AirAsia,I5-996,Bangalore,Evening,one,Early_Morning,Mumbai,Economy,11.17,40,2203
 100975,AirAsia,I5-972,Bangalore,Evening,two_or_more,Early_Morning,Mumbai,Economy,15.25,40,2203
@@ -47,7 +47,7 @@
 100998,Indigo,6.00E-131,Bangalore,Early_Morning,one,Afternoon,Mumbai,Economy,7.42,40,3153
 100999,Indigo,6E-806,Bangalore,Evening,one,Late_Night,Mumbai,Economy,7.5,40,3153
 101000,AirAsia,I5-741,Bangalore,Morning,one,Night,Mumbai,Economy,10.92,40,3385
-101001,Vistara,UK-867,Bangalore,Afternoon,one,Afternoon,Mumbai,Economy,26,40,4007
+101001,Vistara,UK-867,Bangalore,Afternoon,one,Afternoon,Mumbai,Economy,26.0,40,4007
 101002,Air_India,AI-507,Bangalore,Early_Morning,one,Night,Mumbai,Economy,17.42,40,3699
 101003,Air_India,AI-9517,Bangalore,Evening,one,Night,Mumbai,Economy,5.08,40,3709
 101004,Indigo,0.00E+00,Bangalore,Evening,one,Late_Night,Mumbai,Economy,7.08,40,3957
@@ -68,7 +68,7 @@
 101019,Vistara,UK-897,Bangalore,Early_Morning,one,Night,Mumbai,Economy,15.08,40,4792
 101020,Vistara,UK-893,Bangalore,Evening,one,Afternoon,Mumbai,Economy,18.58,40,4792
 101021,Vistara,UK-897,Bangalore,Early_Morning,one,Morning,Mumbai,Economy,26.08,40,4792
-101022,SpiceJet,SG-3027,Bangalore,Early_Morning,one,Afternoon,Mumbai,Economy,9,40,4613
+101022,SpiceJet,SG-3027,Bangalore,Early_Morning,one,Afternoon,Mumbai,Economy,9.0,40,4613
 101023,GO_FIRST,G8-801,Bangalore,Early_Morning,one,Night,Mumbai,Economy,14.75,40,4663
 101024,GO_FIRST,G8-805,Bangalore,Morning,one,Night,Mumbai,Economy,15.25,40,4807
 101025,Air_India,AI-507,Bangalore,Early_Morning,one,Evening,Mumbai,Economy,10.92,40,5290
@@ -97,5 +97,5 @@
 101048,Air_India,AI-503,Bangalore,Evening,one,Evening,Mumbai,Economy,26.67,40,6158
 101049,Air_India,AI-503,Bangalore,Evening,one,Night,Mumbai,Economy,27.92,40,6158
 101050,Air_India,AI-503,Bangalore,Evening,one,Night,Mumbai,Economy,28.83,40,6158
-101051,Vistara,UK-808,Bangalore,Early_Morning,one,Afternoon,Mumbai,Economy,6,40,6568
-101052,Vistara,UK-820,Bangalore,Evening,one,Night,Mumbai,Economy,6,40,6568
+101051,Vistara,UK-808,Bangalore,Early_Morning,one,Afternoon,Mumbai,Economy,6.0,40,6568
+101052,Vistara,UK-820,Bangalore,Evening,one,Night,Mumbai,Economy,6.0,40,6568

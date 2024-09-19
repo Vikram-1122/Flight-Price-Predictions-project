@@ -1,4 +1,4 @@
-,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
+Unnamed: 0,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
 101853,Vistara,UK-810,Bangalore,Early_Morning,one,Night,Mumbai,Economy,14.25,44,7212
 101854,GO_FIRST,G8-790,Bangalore,Afternoon,one,Night,Mumbai,Economy,6.33,44,6863
 101855,GO_FIRST,G8-791,Bangalore,Evening,one,Early_Morning,Mumbai,Economy,11.75,44,6863
@@ -24,7 +24,7 @@
 101875,AirAsia,I5-339,Bangalore,Night,zero,Late_Night,Mumbai,Economy,1.83,45,2201
 101876,GO_FIRST,G8-320,Bangalore,Evening,zero,Evening,Mumbai,Economy,1.92,45,2201
 101877,SpiceJet,SG-438,Bangalore,Early_Morning,zero,Morning,Mumbai,Economy,1.75,45,2202
-101878,SpiceJet,SG-635,Bangalore,Evening,zero,Night,Mumbai,Economy,2,45,2202
+101878,SpiceJet,SG-635,Bangalore,Evening,zero,Night,Mumbai,Economy,2.0,45,2202
 101879,Air_India,AI-610,Bangalore,Evening,zero,Night,Mumbai,Economy,1.92,45,2208
 101880,AirAsia,I5-1782,Bangalore,Night,one,Late_Night,Mumbai,Economy,5.67,45,2203
 101881,AirAsia,I5-722,Bangalore,Late_Night,one,Early_Morning,Mumbai,Economy,6.08,45,2203
@@ -41,16 +41,16 @@
 101892,Indigo,6.00E-295,Bangalore,Evening,zero,Evening,Mumbai,Economy,1.83,45,2309
 101893,GO_FIRST,G8-395,Bangalore,Morning,zero,Morning,Mumbai,Economy,1.75,45,2423
 101894,GO_FIRST,G8-399,Bangalore,Night,zero,Late_Night,Mumbai,Economy,1.83,45,2423
-101895,AirAsia,I5-334,Bangalore,Night,zero,Late_Night,Mumbai,Economy,2,45,3213
+101895,AirAsia,I5-334,Bangalore,Night,zero,Late_Night,Mumbai,Economy,2.0,45,3213
 101896,Indigo,6E-356,Bangalore,Evening,one,Night,Mumbai,Economy,4.75,45,3012
 101897,Indigo,6E-541,Bangalore,Morning,one,Afternoon,Mumbai,Economy,5.67,45,3012
 101898,Indigo,6E-6017,Bangalore,Evening,one,Night,Mumbai,Economy,5.83,45,3012
-101899,Indigo,6E-6012,Bangalore,Afternoon,one,Night,Mumbai,Economy,6,45,3012
+101899,Indigo,6E-6012,Bangalore,Afternoon,one,Night,Mumbai,Economy,6.0,45,3012
 101900,Indigo,6E-356,Bangalore,Evening,one,Night,Mumbai,Economy,6.75,45,3012
 101901,Indigo,6E-841,Bangalore,Afternoon,one,Night,Mumbai,Economy,7.08,45,3012
 101902,Indigo,6E-6825,Bangalore,Early_Morning,one,Afternoon,Mumbai,Economy,7.17,45,3012
 101903,Indigo,6E-575,Bangalore,Night,one,Early_Morning,Mumbai,Economy,7.83,45,3012
-101904,Indigo,6E-6012,Bangalore,Afternoon,one,Night,Mumbai,Economy,8,45,3012
+101904,Indigo,6E-6012,Bangalore,Afternoon,one,Night,Mumbai,Economy,8.0,45,3012
 101905,Indigo,6E-6269,Bangalore,Early_Morning,one,Afternoon,Mumbai,Economy,8.17,45,3012
 101906,Indigo,6E-6257,Bangalore,Early_Morning,one,Morning,Mumbai,Economy,4.08,45,3153
 101907,Indigo,6E-6067,Bangalore,Evening,one,Night,Mumbai,Economy,4.5,45,3153
@@ -69,7 +69,7 @@
 101920,Indigo,6E-886,Bangalore,Morning,one,Evening,Mumbai,Economy,7.67,45,3153
 101921,Indigo,6E-6491,Bangalore,Afternoon,one,Night,Mumbai,Economy,7.92,45,3153
 101922,Indigo,6E-6178,Bangalore,Night,one,Early_Morning,Mumbai,Economy,7.92,45,3153
-101923,Indigo,6E-684,Bangalore,Night,one,Early_Morning,Mumbai,Economy,8,45,3153
+101923,Indigo,6E-684,Bangalore,Night,one,Early_Morning,Mumbai,Economy,8.0,45,3153
 101924,AirAsia,I5-1528,Bangalore,Early_Morning,one,Night,Mumbai,Economy,16.08,45,3385
 101925,Air_India,AI-9517,Bangalore,Evening,one,Early_Morning,Mumbai,Economy,12.33,45,3709
 101926,AirAsia,I5-741,Bangalore,Morning,one,Night,Mumbai,Economy,10.92,45,3953
@@ -77,7 +77,7 @@
 101928,Air_India,AI-776,Bangalore,Early_Morning,one,Night,Mumbai,Economy,17.58,45,4014
 101929,Air_India,AI-9517,Bangalore,Evening,one,Night,Mumbai,Economy,4.5,45,4024
 101930,Air_India,AI-9505,Bangalore,Morning,one,Night,Mumbai,Economy,13.42,45,4027
-101931,Vistara,UK-867,Bangalore,Afternoon,one,Afternoon,Mumbai,Economy,26,45,4406
+101931,Vistara,UK-867,Bangalore,Afternoon,one,Afternoon,Mumbai,Economy,26.0,45,4406
 101932,Indigo,6E-6012,Bangalore,Afternoon,one,Evening,Mumbai,Economy,4.08,45,4105
 101933,Indigo,6E-841,Bangalore,Afternoon,one,Evening,Mumbai,Economy,5.17,45,4105
 101934,GO_FIRST,G8-285,Bangalore,Afternoon,one,Late_Night,Mumbai,Economy,9.42,45,4236

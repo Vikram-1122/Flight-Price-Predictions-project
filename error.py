@@ -1,155 +1,100 @@
 import pandas as pd
 import numpy as np
-import random
 import sys
-
 sys.path.append('..')
 
-# Function to introduce specific real-world errors into the dataset and track them in an Error_Log column
-def introduce_specific_errors(df, num_errors=20):  # Increase the number of errors to 20
-    # Error scenarios we want to introduce
-    error_scenarios = [
-        'missing_value_entity',     # Missing value in a specific entity (e.g., one value from 'Price')
-        'missing_value',            # Missing values in a required column
-        'unknown_value',            # Unknown values for a given feature (e.g., France in Country column)
-        'wrong_value',              # Wrong value for a feature (e.g., negative Age)
-        'string_in_numeric',        # A string value in a numerical column
-        'duplicate_row',            # Duplicate row introduced
-        'incorrect_data_type',      # Incorrect data type: numerical values in categorical columns
-        'outlier_value',            # Outlier or extreme values for numerical columns
-        'invalid_date_format',      # Invalid date in a date column
-        'wrong_column_type'         # Numeric value inserted in categorical column
-    ]
-    
-    # Log of introduced errors
-    error_log = []
-    
-    # Add a new Error_Log column to track errors row by row
-    df['Error_Log'] = np.nan
-    
-    # Get a random sample of row indices where errors will be introduced
-    error_indices = random.sample(range(len(df)), num_errors)
-    
-    for idx, error_type in zip(error_indices, error_scenarios * (num_errors // len(error_scenarios) + 1)):
-        
-        # Select a random column based on the error type
-        if error_type in ['missing_value_entity', 'missing_value', 'unknown_value', 'wrong_value', 'string_in_numeric', 'incorrect_data_type', 'outlier_value', 'invalid_date_format', 'wrong_column_type']:
-            col = random.choice(df.columns)
-        
-        if error_type == 'missing_value_entity':
-            # Introduce missing value in a specific entity (e.g., one price value is removed)
-            if col == 'Price' and df[col].dtype in ['int64', 'float64']:  # Ensure it's the 'Price' column
-                df.loc[idx, col] = np.nan
-                df.loc[idx, 'Error_Log'] = f"Missing value in entity 'Price'"
-                error_log.append(f"Error: Missing value in entity 'Price' at row {idx}")
-        
-        elif error_type == 'missing_value':
-            # Introduce missing values in a required column
-            df.loc[idx, col] = np.nan
-            df.loc[idx, 'Error_Log'] = f"Missing value in required column '{col}'"
-            error_log.append(f"Error: Missing value in required column '{col}' at row {idx}")
-        
-        elif error_type == 'unknown_value':
-            # Add an unknown value 'France' for a given feature (e.g., Country column)
-            if df[col].dtype == 'object' and 'Country' in col:
-                df.loc[idx, col] = 'France'
-                df.loc[idx, 'Error_Log'] = f"Unexpected value 'France' in column '{col}'"
-                error_log.append(f"Error: Unexpected value 'France' in column '{col}' at row {idx}")
-        
-        elif error_type == 'wrong_value':
-            # Add wrong value for a feature (e.g., negative Age)
-            if df[col].dtype in ['int64', 'float64']:
-                df.loc[idx, col] = -999  # Invalid negative value
-                df.loc[idx, 'Error_Log'] = f"Wrong value '-999' in column '{col}'"
-                error_log.append(f"Error: Wrong value '-999' in column '{col}' at row {idx}")
-        
-        elif error_type == 'string_in_numeric':
-            # Add string values in a numerical column (e.g., 'invalid_data' in numeric column)
-            if df[col].dtype in ['int64', 'float64']:
-                df.loc[idx, col] = 'invalid_data'
-                df.loc[idx, 'Error_Log'] = f"String 'invalid_data' in numeric column '{col}'"
-                error_log.append(f"Error: String 'invalid_data' in numeric column '{col}' at row {idx}")
-        
-        elif error_type == 'duplicate_row':
-            # Duplicate a row in the dataset
-            duplicate_row = df.iloc[[idx]].copy()
-            duplicate_row['Error_Log'] = f"Duplicated row from index {idx}"
-            df = pd.concat([df, duplicate_row], ignore_index=True)
-            error_log.append(f"Error: Duplicated row at index {idx}")
-        
-        elif error_type == 'incorrect_data_type':
-            # Insert numerical values into a categorical column (e.g., 'Category' column)
-            if df[col].dtype == 'object':
-                df.loc[idx, col] = random.randint(1, 100)
-                df.loc[idx, 'Error_Log'] = f"Inserted numeric value '{df.loc[idx, col]}' into categorical column '{col}'"
-                error_log.append(f"Error: Incorrect data type: inserted numeric value '{df.loc[idx, col]}' into categorical column '{col}' at row {idx}")
-        
-        elif error_type == 'outlier_value':
-            # Add an extreme outlier value (e.g., extremely high or low value)
-            if df[col].dtype in ['int64', 'float64']:
-                outlier = df[col].mean() * 1000  # Introducing an extreme value (large outlier)
-                df.loc[idx, col] = outlier
-                df.loc[idx, 'Error_Log'] = f"Outlier value '{outlier}' in column '{col}'"
-                error_log.append(f"Error: Outlier value '{outlier}' in column '{col}' at row {idx}")
-        
-        elif error_type == 'invalid_date_format':
-            # Insert an invalid date in a date column
-            if 'date' in col.lower():
-                df.loc[idx, col] = '32/13/2023'  # Invalid date format
-                df.loc[idx, 'Error_Log'] = f"Invalid date '32/13/2023' in column '{col}'"
-                error_log.append(f"Error: Invalid date '32/13/2023' in column '{col}' at row {idx}")
+# Load the dataset
+file_path = ('./testing.csv' )
+df = pd.read_csv(file_path)
 
-        elif error_type == 'wrong_column_type':
-            # Add a numeric value to a text/categorical column
-            if df[col].dtype == 'object':
-                df.loc[idx, col] = 12345  # Insert a numeric value
-                df.loc[idx, 'Error_Log'] = f"Numeric value '12345' added to text/categorical column '{col}'"
-                error_log.append(f"Error: Numeric value '12345' added to text/categorical column '{col}' at row {idx}")
+# Strip whitespace from column names
+df.columns = df.columns.str.strip()
+
+# Dictionary to track errors
+error_log = {
+    'missing_column': [],
+    'missing_values': [],
+    'unknown_values': [],
+    'wrong_values': [],
+    'string_in_numeric': [],
+    'duplicated_rows': 0,  # Track number of duplicated rows
+    'incorrect_data_type': [],
+    'duration_errors': []  # New error log for duration errors
+}
+
+# 1. Add unknown values for 'class' and 'airline'
+unknown_class_sample = df.sample(frac=0.01).index
+df.loc[unknown_class_sample, 'travel_class'] = 'Premium'  # Invalid value
+error_log['unknown_values'].extend([(idx, 'travel_class') for idx in unknown_class_sample])
+
+unknown_airline_sample = df.sample(frac=0.01).index
+df.loc[unknown_airline_sample, 'airline'] = 'AirFrance'  # Invalid value
+error_log['unknown_values'].extend([(idx, 'airline') for idx in unknown_airline_sample])
+
+# 2. Add wrong values for 'price'
+wrong_value_sample = df.sample(frac=0.01).index
+wrong_values = [-1000, 0, -5, 9999999]
+df.loc[wrong_value_sample, 'price'] = np.random.choice(wrong_values, size=len(wrong_value_sample))
+error_log['wrong_values'].extend([(idx, 'price') for idx in wrong_value_sample])
+
+# 3. Add string values to 'price' (should be numeric)
+string_in_numeric_sample = df.sample(frac=0.01).index
+df['price'] = df['price'].astype('object')  # Convert 'price' to object type temporarily
+df.loc[string_in_numeric_sample, 'price'] = 'not available'
+error_log['string_in_numeric'].extend([(idx, 'price') for idx in string_in_numeric_sample])
+
+# Convert 'price' to numeric, forcing errors to NaN
+df['price'] = pd.to_numeric(df['price'], errors='coerce')
+
+# 4. Duplicated rows
+duplicated_sample = df.sample(frac=0.001).copy()  
+df = pd.concat([df, duplicated_sample])
+error_log['duplicated_rows'] += len(duplicated_sample)
+
+# 5. Incorrect data type: Insert numerical values into 'class'
+incorrect_type_sample = df.sample(frac=0.01).index
+df.loc[incorrect_type_sample, 'travel_class'] = 12345
+error_log['incorrect_data_type'].extend([(idx, 'class') for idx in incorrect_type_sample])
+
+# 6. Introduce missing column (e.g., 'days_left')
+required_column = 'days_left'
+if required_column in df.columns:
+    df = df.drop(columns=[required_column])
+    error_log['missing_column'].append(required_column)
+
+# 7. Introduce missing values in 'price'
+missing_value_sample = df.sample(frac=0.01).index
+df.loc[missing_value_sample, 'price'] = np.nan
+error_log['missing_values'].extend([(idx, 'price') for idx in missing_value_sample])
+
+# 8. Introduce 'Paris' as an error in 'source_city'
+missing_source_city_sample = df.sample(frac=0.01).index
+df.loc[missing_source_city_sample, 'source_city'] = 'Paris'
+error_log['unknown_values'].extend([(idx, 'source_city') for idx in missing_source_city_sample])
+
+# 9. Introduce duration errors
+if 'duration' in df.columns:
+    duration_error_sample = df.sample(frac=0.01).index  # 1% of duration errors
+    invalid_durations = ['-1h 30m', '1000h', '25:61', 'invalid', '23hours']  # Various types of invalid durations
     
-    return df, error_log
+    # Assign invalid durations one by one to ensure matching size
+    for i, idx in enumerate(duration_error_sample):
+        df.loc[idx, 'duration'] = np.random.choice(invalid_durations)
+        error_log['duration_errors'].append((idx, 'duration'))
 
-# Load your dataset
-file_path = './testing.csv'  # Change file path as needed
+# Ensure consistent data types in the DataFrame before exporting
+df = df.convert_dtypes()
 
-try:
-    data = pd.read_csv(file_path)
-    data["Country"] = "India"  # Adding default values for 'Country' column
-    print("Dataset loaded successfully!")
-except Exception as e:
-    print(f"Error loading dataset: {e}")
-
-# Check the size of the dataset and adjust sampling accordingly
-try:
-    num_rows = len(data)
-    print(f"Dataset contains {num_rows} rows.")
-    
-    if num_rows < 100:
-        print("Dataset has fewer than 100 rows. Sampling all rows.")
-        sampled_data = data.copy()  # Use the entire dataset if there are fewer than 100 rows
+# Print out the error log summary
+print("\nError Log Summary:")
+for error_type, details in error_log.items():
+    if error_type == 'duplicated_rows':
+        print(f"{error_type}: {details} duplicated rows added")
     else:
-        sampled_data = data.sample(n=100, random_state=42)
-        print("Successfully sampled 100 rows!")
-        
-except Exception as e:
-    print(f"Error sampling data: {e}")
+        print(f"{error_type}: {len(details)} errors added")
+        print(f"Sample errors: {details[:5]}")  # Display the first 5 entries of each type of error
 
-# Introduce errors into the dataset and log errors
-try:
-    data_with_errors, error_log = introduce_specific_errors(sampled_data.copy(), num_errors=20)  # Increased error count to 20
-    
-    # Print error log summary
-    print("\nError Log Summary:")
-    for log in error_log:
-        print(log)
-    
-    # Save the dataset with errors
-    output_file = 'error_dataset.csv'
-    data_with_errors.to_csv(output_file, index=False)
-    print(f"\nDataset with errors saved successfully as '{output_file}'")
-    
-    # Check the Error_Log column for errors
-    print("\nSample of the dataset with errors:")
-    print(data_with_errors[['Error_Log']].dropna().head())  # Show rows where errors were logged
-    
-except Exception as e:
-    print(f"Error introducing errors or saving the dataset: {e}")
+# Save the dataset with errors to the current directory
+output_path =  './error_dataset.csv'
+df.to_csv(output_path, index=False)
+print(f"\nDataset with errors saved to {output_path}")

@@ -1,4 +1,4 @@
-,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
+Unnamed: 0,airline,flight,source_city,departure_time,stops,arrival_time,destination_city,travel_class,duration,days_left,price
 101653,Air_India,AI-501,Bangalore,Afternoon,one,Evening,Mumbai,Economy,6.67,43,6578
 101654,Air_India,AI-501,Bangalore,Afternoon,one,Night,Mumbai,Economy,7.92,43,6578
 101655,Air_India,AI-501,Bangalore,Afternoon,one,Night,Mumbai,Economy,8.25,43,6578
@@ -44,8 +44,8 @@
 101695,AirAsia,I5-339,Bangalore,Night,zero,Late_Night,Mumbai,Economy,1.83,44,2201
 101696,GO_FIRST,G8-399,Bangalore,Night,zero,Night,Mumbai,Economy,1.92,44,2201
 101697,Indigo,6E-5344,Bangalore,Night,zero,Late_Night,Mumbai,Economy,1.92,44,2201
-101698,Indigo,6E-5203,Bangalore,Evening,zero,Night,Mumbai,Economy,2,44,2201
-101699,Indigo,6E-332,Bangalore,Night,zero,Night,Mumbai,Economy,2,44,2201
+101698,Indigo,6E-5203,Bangalore,Evening,zero,Night,Mumbai,Economy,2.0,44,2201
+101699,Indigo,6E-332,Bangalore,Night,zero,Night,Mumbai,Economy,2.0,44,2201
 101700,Indigo,0.00E+00,Bangalore,Evening,one,Late_Night,Mumbai,Economy,4.83,44,2201
 101701,Indigo,6E-6445,Bangalore,Early_Morning,one,Afternoon,Mumbai,Economy,6.25,44,2201
 101702,Indigo,6E-841,Bangalore,Afternoon,one,Night,Mumbai,Economy,7.33,44,2201
@@ -55,7 +55,7 @@
 101706,AirAsia,I5-1622,Bangalore,Afternoon,one,Evening,Mumbai,Economy,6.33,44,2203
 101707,AirAsia,I5-1454,Bangalore,Afternoon,one,Evening,Mumbai,Economy,6.42,44,2203
 101708,AirAsia,I5-749,Bangalore,Night,one,Early_Morning,Mumbai,Economy,8.17,44,2203
-101709,AirAsia,I5-972,Bangalore,Evening,two_or_more,Late_Night,Mumbai,Economy,10,44,2203
+101709,AirAsia,I5-972,Bangalore,Evening,two_or_more,Late_Night,Mumbai,Economy,10.0,44,2203
 101710,AirAsia,I5-1782,Bangalore,Night,one,Early_Morning,Mumbai,Economy,10.92,44,2203
 101711,AirAsia,I5-996,Bangalore,Evening,one,Early_Morning,Mumbai,Economy,11.17,44,2203
 101712,AirAsia,I5-1451,Bangalore,Early_Morning,one,Evening,Mumbai,Economy,13.92,44,2203
