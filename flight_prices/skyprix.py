@@ -14,14 +14,14 @@ def add_background():
         """
         <style>
         .stApp {
-            background-image: url("https://www.eurocontrol.int/sites/default/files/styles/16_9_1920x1080/public/2024-02/eurocontrol-spring-2024-7-year-forecast-banner.jpg?h=e6c88a50&itok=pXMpVvlk");
+            background-image: url("https://img.freepik.com/premium-photo/january-vacation-concept-with-airplane-tickets-yellow-background-with-copy-space-top-view_102583-3147.jpg");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
         }
         .stHeader {
-            color: #000000;
+            color: #0000FF;
         }
         </style>
         """,
