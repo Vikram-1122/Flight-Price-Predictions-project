@@ -82,7 +82,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/good_data:/opt/airflow/good_data
     - ${AIRFLOW_PROJ_DIR:-.}/bad_data:/opt/airflow/bad_data
     - ${AIRFLOW_PROJ_DIR:-.}/processed_files_tracker.txt:/opt/airflow/processed_files_tracker.txt
-    - ${AIRFLOW_PROJ_DIR:-.}/dsp-skyprix/airflow-alpha:/opt/airflow/save_statistics.csv
+    - ${AIRFLOW_PROJ_DIR:-.}save_statistics:/opt/airflow/save_statistics.csv
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on

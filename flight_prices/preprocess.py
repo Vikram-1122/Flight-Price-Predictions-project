@@ -1,4 +1,4 @@
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.compose import ColumnTransformer
 
 def get_preprocessor():
@@ -6,13 +6,13 @@ def get_preprocessor():
                         'arrival_time', 'destination_city', 'travel_class']
     numerical_cols = ['duration', 'days_left']
 
-    # preprocess the numerical columns.
-    numerical_transformer = 'passthrough'
+    # Preprocess the numerical columns with StandardScaler
+    numerical_transformer = StandardScaler()
 
-    # Preprocess the categorical columns.
+    # Preprocess the categorical columns with OneHotEncoder
     categorical_transformer = OneHotEncoder(handle_unknown='ignore')
 
-    # column transformation of both numerical and categorical columns.
+    # Column transformation of both numerical and categorical columns
     preprocessor = ColumnTransformer(
         transformers=[
             ('num', numerical_transformer, numerical_cols),
