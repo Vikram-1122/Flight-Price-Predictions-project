@@ -13,14 +13,14 @@ def add_background():
         """
         <style>
         .stApp {
-            background-image: url("https://wallpapers.com/images/featured/4k-plane-39efmsuz0fhub1c3.jpg");
+            background-image: url("https://img.freepik.com/premium-photo/january-vacation-concept-with-airplane-tickets-yellow-background-with-copy-space-top-view_102583-3147.jpg");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
         }
         .stHeader {
-            color: #ffffff;
+            color: #0000FF;
         }
         </style>
         """,

@@ -28,7 +28,7 @@ class SinglePredictionInput(BaseModel):
     days_left: int
     price: int
 
-# Utility functions to handle file and JSON input
+# to handle file input
 def handle_file(file: UploadFile) -> pd.DataFrame:
     file_content = file.file.read().decode('utf-8')
     if not file_content.strip():
@@ -36,6 +36,7 @@ def handle_file(file: UploadFile) -> pd.DataFrame:
     df = pd.read_csv(StringIO(file_content))
     return df
 
+# to handle json input
 def handle_json(input: SinglePredictionInput) -> pd.DataFrame:
     df = pd.DataFrame([input.dict()])
     return df
@@ -49,7 +50,7 @@ async def predict(
     logger.info(f"Received file: {file.filename if file else 'None'}")
     logger.info(f"Received JSON input: {input if input else 'None'}")
 
-    # Ensure either file or JSON input is provided
+    
     if file and input:
         raise HTTPException(status_code=400, detail="Provide either a file or JSON input, not both.")
     
@@ -68,7 +69,7 @@ async def predict(
     else:
         raise HTTPException(status_code=400, detail="No file or JSON input provided.")
 
-    # Load the model and make predictions
+    # Load the model
     pipeline_filename = 'flight_price_prediction_model.pkl'
     try:
         pipeline = joblib.load(pipeline_filename)
@@ -76,10 +77,10 @@ async def predict(
         logger.error("Prediction model not found.")
         raise HTTPException(status_code=500, detail="Prediction model not available.")
 
-    # Make predictions using the DataFrame
+    
     predictions = pipeline.predict(df)
     
-    # Assuming you want to return predictions as a JSON response
+    
     return {"predictions": predictions.tolist()}
 
  
