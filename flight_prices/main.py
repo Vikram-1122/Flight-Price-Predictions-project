@@ -1,24 +1,21 @@
-from datetime import datetime
-import logging
-from fastapi import FastAPI, HTTPException, Depends
+from typing import Union
+from fastapi import FastAPI, UploadFile, File, HTTPException, Body, Depends
 from pydantic import BaseModel
-from typing import List, Union, Optional
-import joblib
-import pandas as pd
-import uvicorn
-from db import Prediction, get_db
 from sqlalchemy.orm import Session
-import numpy as np
+import pandas as pd
+import joblib
+from io import StringIO
+from datetime import datetime
+from db import Prediction, get_db
+import logging
 
-# Initialize FastAPI app
+
 app = FastAPI()
-
-# Setup logging
+logger = logging.getLogger("uvicorn")
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
-# Define Pydantic models
-class FlightPricePrediction(BaseModel):
+
+class SinglePredictionInput(BaseModel):
     airline: str
     flight: str
     source_city: str
@@ -31,93 +28,78 @@ class FlightPricePrediction(BaseModel):
     days_left: int
     price: int
 
-class PredictionRequest(BaseModel):
-    data: Union[FlightPricePrediction, List[FlightPricePrediction]]
+# Utility functions to handle file and JSON input
+def handle_file(file: UploadFile) -> pd.DataFrame:
+    file_content = file.file.read().decode('utf-8')
+    if not file_content.strip():
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    df = pd.read_csv(StringIO(file_content))
+    return df
 
-# Load pre-trained models
-try:
-    le = joblib.load('models/encoder.joblib')  # Load label encoder
-    scaler = joblib.load('models/scaler.joblib')  # Load scaler
-    model = joblib.load('models/model.joblib')  # Load model
-except FileNotFoundError:
-    logger.error("Model or preprocessing files not found. Please check the paths.")
-    raise HTTPException(status_code=500, detail="Model not available")
+def handle_json(input: SinglePredictionInput) -> pd.DataFrame:
+    df = pd.DataFrame([input.dict()])
+    return df
 
-# Function to preprocess and make predictions
-def preprocess_and_predict(df: pd.DataFrame) -> List[float]:
-    try:
-        logger.info(f"Input shape: {df.shape}")
+@app.post("/predict")
+async def predict(
+    file: UploadFile = File(None),
+    input: Union[SinglePredictionInput, None] = Body(None),
+    db: Session = Depends(get_db)
+):
+    logger.info(f"Received file: {file.filename if file else 'None'}")
+    logger.info(f"Received JSON input: {input if input else 'None'}")
 
-        # Separate numerical and categorical features
-        numerical_features = df[['duration', 'days_left', 'price']]
-        categorical_features = df[['airline', 'source_city', 'departure_time', 'stops', 
-                                    'arrival_time', 'destination_city', 'travel_class']]
-
-        # Scale numerical features
-        scaled_numerical = scaler.transform(numerical_features)
-
-        # Encode categorical features
-        encoded_categorical = le.transform(categorical_features)
-
-        # Combine processed features
-        processed_features = np.hstack([scaled_numerical, encoded_categorical])
-
-        # Make predictions
-        predictions = model.predict(processed_features).tolist()
-        logger.info(f"Predictions: {predictions}")
-        return predictions
-    except Exception as e:
-        logger.error(f"Error during prediction: {e}")
-        raise HTTPException(status_code=500, detail="Prediction failed")
-
-# Function to insert prediction data into the database
-def insert_data(db: Session, data: FlightPricePrediction, result: float, source: str):
-    table_data = Prediction(
-        airline=data.airline,
-        flight=data.flight,
-        source_city=data.source_city,
-        departure_time=data.departure_time,
-        stops=data.stops,
-        arrival_time=data.arrival_time,
-        destination_city=data.destination_city,
-        travel_class=data.travel_class,
-        duration=data.duration,
-        days_left=data.days_left,
-        price=data.price,
-        predicted_price=result,
-        source=source,
-    )
-    db.add(table_data)
-    db.commit()
-
-# Prediction endpoint
-@app.post('/predict')
-def predict(request: PredictionRequest, db: Session = Depends(get_db)):
-    if isinstance(request.data, list):
-        dict_data = [row.dict() for row in request.data]
-        input_data = pd.DataFrame(dict_data)
-        predictions = preprocess_and_predict(input_data)
-
-        for i in range(len(request.data)):
-            insert_data(db, request.data[i], predictions[i], 'webapp')
-        return predictions
+    # Ensure either file or JSON input is provided
+    if file and input:
+        raise HTTPException(status_code=400, detail="Provide either a file or JSON input, not both.")
+    
+    if file:
+        try:
+            df = handle_file(file)
+        except Exception as e:
+            logger.error(f"File processing error: {str(e)}")
+            raise HTTPException(status_code=400, detail="Error processing the uploaded file.")
+    elif input:
+        try:
+            df = handle_json(input)
+        except Exception as e:
+            logger.error(f"JSON processing error: {str(e)}")
+            raise HTTPException(status_code=400, detail="Error processing JSON input.")
     else:
-        dict_data = request.data.dict()
-        input_data = pd.DataFrame([dict_data])
-        predictions = preprocess_and_predict(input_data)
-        insert_data(db, request.data, predictions[0], 'webapp')
-        return predictions[0]
+        raise HTTPException(status_code=400, detail="No file or JSON input provided.")
 
-@app.get('/past-predictions')
-def get_past_predictions(start_date: datetime, end_date: datetime, prediction_source: Optional[str] = None, db: Session = Depends(get_db)):
+    # Load the model and make predictions
+    pipeline_filename = 'flight_price_prediction_model.pkl'
+    try:
+        pipeline = joblib.load(pipeline_filename)
+    except FileNotFoundError:
+        logger.error("Prediction model not found.")
+        raise HTTPException(status_code=500, detail="Prediction model not available.")
+
+    # Make predictions using the DataFrame
+    predictions = pipeline.predict(df)
+    
+    # Assuming you want to return predictions as a JSON response
+    return {"predictions": predictions.tolist()}
+
+ 
+
+@app.get("/past-predictions")
+def get_past_predictions(
+    start_date: datetime,
+    end_date: datetime,
+    prediction_source: str = "all",
+    db: Session = Depends(get_db)
+):
     try:
         query = db.query(Prediction).filter(
-            Prediction.prediction_date >= start_date,
-            Prediction.prediction_date <= end_date
+            Prediction.prediction_date >= start_date.date(),
+            Prediction.prediction_date <= end_date.date()
         )
-        if prediction_source and prediction_source != "all":
+        
+        if prediction_source != "all":
             query = query.filter(Prediction.prediction_source == prediction_source)
-
+        
         past_predictions = query.all()
         
         results = [
@@ -134,7 +116,7 @@ def get_past_predictions(start_date: datetime, end_date: datetime, prediction_so
                 "duration": pred.duration,
                 "days_left": pred.days_left,
                 "price": pred.price,
-                "predicted_price": pred.predicted_price,
+                "prediction_result": pred.prediction_result,
                 "prediction_source": pred.prediction_source
             }
             for pred in past_predictions
@@ -147,4 +129,4 @@ def get_past_predictions(start_date: datetime, end_date: datetime, prediction_so
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving past predictions: {str(e)}")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    main()
