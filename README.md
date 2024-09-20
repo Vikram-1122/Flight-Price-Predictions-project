@@ -51,8 +51,7 @@ The dataset used for predictions contains the following features:
 
 #### API Endpoints
 The model service API exposes the following endpoints:
-- **POST /predict-json**: Makes predictions based on flight data provided in JSON format.
-- **POST /predict-file**: Allows users to upload a `.csv` file for bulk predictions.
+- **POST /predict**: Makes predictions based on flight data provided in JSON format as well as Allows users to upload a `.csv` file for bulk predictions.
 - **GET /past-predictions**: Retrieves past predictions along with the input features used.
 
 ---
@@ -81,7 +80,7 @@ The model service API exposes the following endpoints:
 
 2. **Run Streamlit Application**:
    ```
-   streamlit run app.py
+   streamlit run skyprix.py
    ```
 
 3. **Set Up Airflow** (using Docker):
@@ -101,8 +100,7 @@ The model service API exposes the following endpoints:
    pip install great_expectations
    ```
 
-5. **Grafana**:
-   Download and install Grafana from the official website and follow installation instructions.
+
 
 ---
 
@@ -115,11 +113,6 @@ The model service API exposes the following endpoints:
 **Past Predictions Webpage**:
 - View past predictions by selecting the date range and prediction source (`webapp`, `scheduled predictions`, or `all`).
 
----
-
-#### Monitoring
-- **Data Quality Monitoring**: Grafana dashboard will show real-time statistics on data quality issues, such as missing values, incorrect data types, etc.
-- **Model Performance Monitoring**: Grafana will display model performance metrics, including prediction trends and data drift.
 
 ---
 
