@@ -20,8 +20,17 @@ def add_background():
             background-repeat: no-repeat;
             background-attachment: fixed;
         }
-        .stHeader {
-            color: #0000FF;
+        .stDataFrame {
+            background-color: #000000;  /* Black background for the table */
+            color: #FFFFFF;              /* White text for high contrast */
+            opacity: 0.9;                /* Slight transparency for better visibility */
+        }
+        .stDataFrame th {
+            background-color: #333333;   /* Dark gray for table headers */
+            color: #FFFFFF;              /* White text in headers */
+        }
+        .stDataFrame td {
+            padding: 10px;
         }
         </style>
         """,
@@ -39,12 +48,12 @@ def prediction_page():
     source_city = st.selectbox("Source City", ["Mumbai", "Delhi", "Hyderabad", "Bangalore", "Kolkata", "Chennai"])
     departure_time = st.selectbox("Departure Time", ["Early_Morning", "Morning", "Afternoon", "Evening", "Night"])
     stops = st.selectbox("Stops", ["zero", "one", "two", "three", "four"])
-    arrival_time = st.selectbox("Arrival Time", ["Early_Morning", "Morning", "Afternoon", "Evening", "Night"])
-    destination_city = st.selectbox("Destination City", ["Mumbai", "Delhi", "Hyderabad", "Bangalore", "Kolkata", "Chennai"])
+    arrival_time = st.selectbox("Arrival Time", ["Morning", "Afternoon", "Evening", "Night", "Early_Morning"])
+    destination_city = st.selectbox("Destination City", ["Delhi", "Hyderabad", "Bangalore", "Kolkata", "Chennai", "Mumbai"])
     travel_class = st.selectbox("Travel Class", ["Economy", "Business", "First"])
-    duration = st.number_input("Duration (in hours)", min_value=0.0, step=0.1)
+    duration = st.number_input("Duration (in hours)", min_value=2.0, step=0.1)
     days_left = st.number_input("Days Left to Departure", min_value=0, step=1)
-    price = st.number_input("Price (in your currency)", min_value=0, step=100)
+    price = st.number_input("Price (in your currency)", min_value=2500, step=100)
 
     if st.button("Predict"):
         data = {
@@ -71,9 +80,12 @@ def prediction_page():
                 result_df = pd.DataFrame([result])
                 
                 st.write("Input Values:")
-                st.table(input_df)
+                st.dataframe(input_df.style.set_table_attributes('class="stDataFrame"').set_properties(**{
+                    'background-color': 'black', 'color': 'white', 'border-color': 'white'}))
+                
                 st.write("Prediction:")
-                st.table(result_df)
+                st.dataframe(result_df.style.set_table_attributes('class="stDataFrame"').set_properties(**{
+                    'background-color': 'black', 'color': 'white', 'border-color': 'white'}))
             except requests.exceptions.HTTPError as http_err:
                 st.write(f"HTTP error occurred: {http_err}")
             except Exception as err:
@@ -101,7 +113,8 @@ def prediction_page():
                         predictions = result.get('predictions', [])
                         df['Prediction'] = predictions
                         st.write("Predictions:")
-                        st.table(df)
+                        st.dataframe(df.style.set_table_attributes('class="stDataFrame"').set_properties(**{
+                            'background-color': 'black', 'color': 'white', 'border-color': 'white'}))
                     except requests.exceptions.HTTPError as http_err:
                         st.write(f"HTTP error occurred: {http_err}")
                     except Exception as err:
@@ -131,7 +144,8 @@ def show_past_predictions_page():
                 past_predictions = response.json()
                 if past_predictions:
                     st.write("Past Predictions:")
-                    st.table(pd.DataFrame(past_predictions))
+                    st.dataframe(pd.DataFrame(past_predictions).style.set_table_attributes('class="stDataFrame"').set_properties(**{
+                        'background-color': 'black', 'color': 'white', 'border-color': 'white'}))
                 else:
                     st.write("No predictions found for the given date range and source.")
             except requests.exceptions.HTTPError as http_err:
