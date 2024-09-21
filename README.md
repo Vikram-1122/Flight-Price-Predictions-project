@@ -78,14 +78,21 @@ The model service API exposes the following endpoints:
    pip install -r requirements.txt
    ```
 
-2. **Run Streamlit Application**:
+2. **Run FASTAPI**:
+   ```
+   uvicorn main:app --reload
+   ```
+   
+3. **Run Streamlit Application**:
    ```
    streamlit run skyprix.py
    ```
 
-3. **Set Up Airflow** (using Docker):
+4. **Set Up Airflow** (using Docker):
    - Build and start Airflow with Docker:
      ```
+     set AIRFLOW_HOME=%cd%\airflow
+     docker-compose build
      docker-compose up airflow-init
      docker-compose up
      ```
@@ -93,8 +100,12 @@ The model service API exposes the following endpoints:
      ```
      http://localhost:8080
      ```
+  -  Down or stop the Docker:
+    ```
+     docker-compose down
+    ```
 
-4. **Great Expectations**:
+5. **Great Expectations**:
    Install Great Expectations for data validation:
    ```
    pip install great_expectations
