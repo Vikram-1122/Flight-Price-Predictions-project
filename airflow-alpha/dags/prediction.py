@@ -33,37 +33,36 @@ def update_processed_files(new_file):
 def prediction_dag():
     @task
     def check_for_new_data():
-        good_data_folder = '/opt/airflow/good_data'  # Replace with the actual path
+        good_data_folder = '/opt/airflow/good_data'  
         all_files = [os.path.join(good_data_folder, f) for f in os.listdir(good_data_folder) if f.endswith('.csv')]
         processed_files = get_processed_files()
         
-        # Identify the first new file by excluding processed files
+    
         new_files = [file for file in all_files if file not in processed_files]
         
         if not new_files:
             raise AirflowSkipException("No new files to process. Skipping DAG run.")
         
-        # Return only the first new file to process
+        
         return new_files[0]
 
     @task
     def make_predictions(file_path: str):
-        model_api_url = 'http://localhost:8000/predict'  # Replace with your actual model API endpoint
+        model_api_url = 'http://localhost:8000/predict'  
         
         try:
             files = {'file': open(file_path, 'rb')}
             response = requests.post(model_api_url, files=files)
             response.raise_for_status()
             predictions = response.json()
-            # You can save or log predictions as needed
+            
             print(f"Predictions for {file_path}: {predictions}")
         except requests.exceptions.RequestException as e:
             print(f"Failed to get predictions for {file_path}: {e}")
 
-        # Update processed files tracker for the single file processed
         update_processed_files(file_path)
 
-    # Task dependencies
+  
     new_file = check_for_new_data()
     make_predictions(new_file)
 

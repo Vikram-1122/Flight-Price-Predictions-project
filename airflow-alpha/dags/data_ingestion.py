@@ -62,7 +62,7 @@ def my_data_ingestion_dag():
         valid_departure_times = ["Early_Morning", "Morning", "Afternoon", "Evening", "Night", "Late_Night"]
         valid_stops = ["zero", "one", "two_or_more", "two", "three", "four", "five"]
 
-        # Check for missing or invalid values
+        
         if data[['airline', 'source_city', 'departure_time', 'stops']].isnull().values.any():
             logging.error("Missing values detected")
             return "Failed"
@@ -91,11 +91,11 @@ def my_data_ingestion_dag():
     def split_and_save_data(file_path: str, status: str) -> str:
         data = pd.read_csv(file_path)
         
-        # Attempt to convert 'duration' and 'price' columns
+        
         data['duration'] = pd.to_numeric(data['duration'], errors='coerce')
         data['price'] = pd.to_numeric(data['price'], errors='coerce')
         
-        # Define conditions for good and bad data
+        
         good_data_condition = (
             data['airline'].notnull() &
             data['flight'].notnull() &
@@ -106,8 +106,8 @@ def my_data_ingestion_dag():
             (data['price'] > 0) &
             (data['days_left'] >= 0) &
             data['stops'].isin(['zero', 'one', 'two_or_more', 'two', 'three', 'four', 'five']) &
-            data['departure_time'].isin(['Morning', 'Afternoon', 'Evening', 'Night', 'Early_Morning']) &
-            data['arrival_time'].isin(['Morning', 'Afternoon', 'Evening', 'Night', 'Early_Morning'])
+            data['departure_time'].isin(['Morning', 'Afternoon', 'Evening', 'Night', 'Early_Morning', 'Late_Night']) &
+            data['arrival_time'].isin(['Morning', 'Afternoon', 'Evening', 'Night', 'Early_Morning', 'Late_Night'])
         )
         
         good_data_folder = '/opt/airflow/good_data'
