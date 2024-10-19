@@ -1,0 +1,8 @@
+/opt/airflow/good_data/Data_1.csv
+/opt/airflow/good_data/data_10.csv
+/opt/airflow/good_data/data_11.csv
+/opt/airflow/good_data/data_1.csv
+/opt/airflow/good_data/data_12.csv
+/opt/airflow/good_data/data_13.csv
+/opt/airflow/good_data/data_14.csv
+/opt/airflow/good_data/data_15.csv
