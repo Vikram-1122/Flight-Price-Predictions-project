@@ -1,6 +1,7 @@
+import joblib
 import streamlit as st
-import requests
 import pandas as pd
+<<<<<<< Updated upstream
 
 # Default values for inputs
 default_flight_number = "AI2023"
@@ -107,6 +108,58 @@ def main():
                     st.write(df_result)
         else:
             st.write("An error occurred during prediction.")
+=======
+import requests
 
-if __name__ == "__main__":
-    main()
+st.title('Flight Price Prediction')
+st.header('Single Prediction')
+
+preprocessor = joblib.load('models/preprocessor.joblib')
+model = joblib.load('models/model.joblib')
+
+airline = st.selectbox("Airline", ["AirAsia", "SpiceJet", "Vistara", "GO_FIRST", "Indigo", "Air_India"])
+flight = st.text_input("Flight Number")
+source_city = st.selectbox("Source City", ["Mumbai", "Delhi", "Hyderabad", "Bangalore", "Kolkata", "Chennai"])
+departure_time = st.selectbox("Departure Time", ["Early_Morning", "Morning", "Afternoon", "Evening", "Night"])
+stops = st.selectbox("Stops", ["zero", "one", "two", "three", "four"])
+arrival_time = st.selectbox("Arrival Time", ["Morning", "Early_Morning", "Afternoon", "Evening", "Night"])
+destination_city = st.selectbox("Destination City", ["Delhi", "Hyderabad", "Bangalore", "Kolkata", "Chennai", "Mumbai"])
+travel_class = st.selectbox("Travel Class", ["Economy", "Business", "First"])
+duration = st.number_input("Duration (in hours)", min_value=2.0, step=0.1)
+days_left = st.number_input("Days Left to Departure", min_value=0, step=1)
+
+if st.button('Predict'):
+    input_data = {
+    "airline": "Air_India",
+    "flight": "AI-431",
+    "source_city": "Delhi",
+    "departure_time": "Afternoon",
+    "stops": "one",
+    "arrival_time": "Afternoon",
+    "destination_city": "Mumbai",
+    "travel_class": "Economy",
+    "duration": 24.5,
+    "days_left": 31,
+    "price": 5231
+}
+    
+    response = requests.post('http://localhost:8000/predict', json=input_data)
+    st.write('Predicted Price:', response.json()['price'])
+
+st.header('Bulk Prediction')
+uploaded_file = st.file_uploader('Upload a CSV file', type='csv')
+if uploaded_file:
+    input_df = pd.read_csv(uploaded_file)
+    response = requests.post('http://localhost:8000/predict', json=input_df.to_dict(orient='records'))
+    st.write('Predicted Prices:', response.json())
+>>>>>>> Stashed changes
+
+st.header('Past Predictions')
+date_range = st.date_input('Select Date Range', [])
+prediction_source = st.selectbox('Select Prediction Source', ['webapp', 'scheduled predictions', 'all'])
+
+if st.button('Fetch Past Predictions'):
+    params = {'start_date': date_range[0], 'end_date': date_range[1], 'source': prediction_source}
+    response = requests.get('http://localhost:8000/past-predictions', params=params)
+    predictions = pd.DataFrame(response.json())
+    st.write(predictions)
