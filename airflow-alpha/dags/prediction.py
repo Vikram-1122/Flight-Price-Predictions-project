@@ -60,7 +60,9 @@ def prediction_dag():
         except requests.exceptions.RequestException as e:
             print(f"Failed to get predictions for {file_path}: {e}")
 
+        update_processed_files(file_path)
 
+  
     new_file = check_for_new_data()
     make_predictions(new_file)
 
