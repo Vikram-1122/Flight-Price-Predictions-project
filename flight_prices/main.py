@@ -1,45 +1,21 @@
-from fastapi import FastAPI, Query
+from typing import Union
+from fastapi import FastAPI, UploadFile, File, HTTPException, Body, Depends
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 import pandas as pd
 import joblib
-from dotenv import load_dotenv
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import Column, Integer, String, Float, DateTime
+from io import StringIO
 from datetime import datetime
+from db import Prediction, get_db
+import logging
 
-load_dotenv()
-model = joblib.load('models/model.joblib')
-preprocessor = joblib.load('models/preprocessor.joblib')
-
-DATABASE_URL = "postgresql+psycopg2://postgres:root@localhost:5432/predictions"
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-class Prediction(Base):
-    __tablename__ = 'predictions'
-    id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
-    source = Column(String)
-    airline = Column(String)
-    flight = Column(String)
-    source_city = Column(String)
-    departure_time = Column(String)
-    stops = Column(String)
-    arrival_time = Column(String)
-    destination_city = Column(String)
-    travel_class = Column(String)
-    duration = Column(Float)
-    days_left = Column(Integer)
-    price = Column(Float)
-
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+logger = logging.getLogger("uvicorn")
+logging.basicConfig(level=logging.INFO)
 
-class FlightData(BaseModel):
+
+class SinglePredictionInput(BaseModel):
     airline: str
     flight: str
     source_city: str
@@ -50,45 +26,108 @@ class FlightData(BaseModel):
     travel_class: str
     duration: float
     days_left: int
-    source: str = "webapp"
+    price: int
+
+# to handle file input
+def handle_file(file: UploadFile) -> pd.DataFrame:
+    file_content = file.file.read().decode('utf-8')
+    if not file_content.strip():
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    df = pd.read_csv(StringIO(file_content))
+    return df
+
+# to handle json input
+def handle_json(input: SinglePredictionInput) -> pd.DataFrame:
+    df = pd.DataFrame([input.dict()])
+    return df
 
 @app.post("/predict")
-async def predict(data: FlightData):
-    df = pd.DataFrame([data.dict(exclude={'source'})])
-    processed_features = preprocessor.transform(df)
-    prediction = model.predict(processed_features)
+async def predict(
+    file: UploadFile = File(None),
+    input: Union[SinglePredictionInput, None] = Body(None),
+    db: Session = Depends(get_db)
+):
+    logger.info(f"Received file: {file.filename if file else 'None'}")
+    logger.info(f"Received JSON input: {input if input else 'None'}")
+
     
-    db = SessionLocal()
-    new_prediction = Prediction(
-        source=data.source,
-        airline=data.airline,
-        flight=data.flight,
-        source_city=data.source_city,
-        departure_time=data.departure_time,
-        stops=data.stops,
-        arrival_time=data.arrival_time,
-        destination_city=data.destination_city,
-        travel_class=data.travel_class,
-        duration=data.duration,
-        days_left=data.days_left,
-        price=prediction[0]
-    )
-    db.add(new_prediction)
-    db.commit()
-    db.close()
+    if file and input:
+        raise HTTPException(status_code=400, detail="Provide either a file or JSON input, not both.")
     
-    return {"price": prediction[0]}
+    if file:
+        try:
+            df = handle_file(file)
+        except Exception as e:
+            logger.error(f"File processing error: {str(e)}")
+            raise HTTPException(status_code=400, detail="Error processing the uploaded file.")
+    elif input:
+        try:
+            df = handle_json(input)
+        except Exception as e:
+            logger.error(f"JSON processing error: {str(e)}")
+            raise HTTPException(status_code=400, detail="Error processing JSON input.")
+    else:
+        raise HTTPException(status_code=400, detail="No file or JSON input provided.")
+
+    # Load the model
+    pipeline_filename = 'flight_price_prediction_model.pkl'
+    try:
+        pipeline = joblib.load(pipeline_filename)
+    except FileNotFoundError:
+        logger.error("Prediction model not found.")
+        raise HTTPException(status_code=500, detail="Prediction model not available.")
+
+    
+    predictions = pipeline.predict(df)
+    
+    
+    return {"predictions": predictions.tolist()}
+
+ 
 
 @app.get("/past-predictions")
-async def get_past_predictions(start_date: str, end_date: str, source: str = Query("all")):
-    db = SessionLocal()
-    query = db.query(Prediction)
-    if start_date and end_date:
-        query = query.filter(Prediction.timestamp >= start_date, Prediction.timestamp <= end_date)
-    if source != "all":
-        query = query.filter(Prediction.source == source)
+def get_past_predictions(
+    start_date: datetime,
+    end_date: datetime,
+    prediction_source: str = "all",
+    db: Session = Depends(get_db)
+):
+    try:
+        query = db.query(Prediction).filter(
+            Prediction.prediction_date >= start_date.date(),
+            Prediction.prediction_date <= end_date.date()
+        )
+        
+        if prediction_source != "all":
+            query = query.filter(Prediction.prediction_source == prediction_source)
+        
+        past_predictions = query.all()
+        
+        results = [
+            {
+                "prediction_date": pred.prediction_date,
+                "airline": pred.airline,
+                "flight": pred.flight,
+                "source_city": pred.source_city,
+                "departure_time": pred.departure_time,
+                "stops": pred.stops,
+                "arrival_time": pred.arrival_time,
+                "destination_city": pred.destination_city,
+                "travel_class": pred.travel_class,
+                "duration": pred.duration,
+                "days_left": pred.days_left,
+                "price": pred.price,
+                "prediction_result": pred.prediction_result,
+                "prediction_source": pred.prediction_source
+            }
+            for pred in past_predictions
+        ]
+        
+        return results
     
-    results = query.all()
-    db.close()
-    return [{column.name: getattr(result, column.name) for column in result.__table__.columns} for result in results]  
+    except Exception as e:
+        logger.error(f"An error occurred while retrieving past predictions: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving past predictions: {str(e)}")
 
+if __name__ == "__main__":
+    main()
