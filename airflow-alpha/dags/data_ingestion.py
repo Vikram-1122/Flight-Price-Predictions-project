@@ -18,7 +18,7 @@ default_args = {
 }
 
 @dag(
-    dag_id='data_ingestion_dag',
+    dag_id='data_ingestion_dag_1',
     description='A DAG for data ingestion and validation with Great Expectations and PostgreSQL logging',
     schedule_interval='* * * * *',  # every minute
     start_date=days_ago(1),
@@ -32,14 +32,8 @@ def my_data_ingestion_dag():
     def read_data() -> str:
         raw_data_folder = '/opt/airflow/raw_data'
         files = [f for f in os.listdir(raw_data_folder) if f.endswith('.csv') and not f.startswith('.ipynb_checkpoints')]
-        logging.info(f"Files found in raw data folder: {files}")
-
         if files:
-            file_path = os.path.join(raw_data_folder, files[0])
-            logging.info(f"Reading file: {file_path}")
-            return file_path
-        
-        logging.warning("No files found in raw data folder")
+            return os.path.join(raw_data_folder, files[0])
         return ""
 
     @task
@@ -50,7 +44,7 @@ def my_data_ingestion_dag():
 
         # Load data and initialize Great Expectations DataFrame
         data = pd.read_csv(file_path)
-        df_ge = ge.from_pandas(data)
+        df_ge = ge.dataset.PandasDataset(data)
 
         # PostgreSQL Connection
         engine = create_engine('postgresql://postgres:root@localhost:5432/predictions')
@@ -147,16 +141,10 @@ def my_data_ingestion_dag():
         )
         alert.execute({})  # Execute the alert task
 
-    @task
-    def split_and_save_data(file_path: str, validation_results: dict):
-        data = pd.read_csv(file_path)
-        # Data splitting code here ...
-        # Move or split the data into good_data and bad_data folders as per validation
-
+    # Define the workflow
     file_path = read_data()
     validation_results = validate_data(file_path)
     save_statistics(file_path, validation_results)
     send_alert(file_path, validation_results)
-    split_and_save_data(file_path, validation_results)
 
 data_ingestion_dag = my_data_ingestion_dag()

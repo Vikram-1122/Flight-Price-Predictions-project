@@ -6,14 +6,12 @@ import pandas as pd
 import joblib
 from io import StringIO
 from datetime import datetime
-from db import Prediction, get_db
+from db import Prediction, get_db, init_db
 import logging
-
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn")
 logging.basicConfig(level=logging.INFO)
-
 
 class SinglePredictionInput(BaseModel):
     airline: str
@@ -28,7 +26,10 @@ class SinglePredictionInput(BaseModel):
     days_left: int
     price: int
 
-# to handle file input
+# Initialize the database
+init_db()
+
+# Function to handle file input
 def handle_file(file: UploadFile) -> pd.DataFrame:
     file_content = file.file.read().decode('utf-8')
     if not file_content.strip():
@@ -36,7 +37,7 @@ def handle_file(file: UploadFile) -> pd.DataFrame:
     df = pd.read_csv(StringIO(file_content))
     return df
 
-# to handle json input
+# Function to handle JSON input
 def handle_json(input: SinglePredictionInput) -> pd.DataFrame:
     df = pd.DataFrame([input.dict()])
     return df
@@ -50,7 +51,6 @@ async def predict(
     logger.info(f"Received file: {file.filename if file else 'None'}")
     logger.info(f"Received JSON input: {input if input else 'None'}")
 
-    
     if file and input:
         raise HTTPException(status_code=400, detail="Provide either a file or JSON input, not both.")
     
@@ -77,13 +77,52 @@ async def predict(
         logger.error("Prediction model not found.")
         raise HTTPException(status_code=500, detail="Prediction model not available.")
 
-    
+    # Make predictions
     predictions = pipeline.predict(df)
-    
-    
-    return {"predictions": predictions.tolist()}
 
- 
+    # Check if predictions have been generated correctly
+    if len(predictions) != len(df):
+        logger.error("Number of predictions does not match number of input rows.")
+        raise HTTPException(status_code=500, detail="Mismatch between input data and predictions.")
+
+    # Add predictions to DataFrame
+    df['prediction_result'] = predictions
+    now = datetime.now()
+    df['prediction_date'] = now.date()  # Storing date
+    df['prediction_time'] = now.time()  # Storing time
+    df['prediction_source'] = 'webapp' if file else 'json'
+
+    # Log the DataFrame structure for debugging
+    logger.info(f"DataFrame before saving:\n{df.head()}")
+
+    # Store predictions in the database
+    try:
+        for _, row in df.iterrows():
+            prediction = Prediction(
+                prediction_date=row['prediction_date'],
+                prediction_time=row['prediction_time'],
+                airline=row['airline'],
+                flight=row['flight'],
+                source_city=row['source_city'],
+                departure_time=row['departure_time'],
+                stops=row['stops'],
+                arrival_time=row['arrival_time'],
+                destination_city=row['destination_city'],
+                travel_class=row['travel_class'],
+                duration=row['duration'],
+                days_left=row['days_left'],
+                price=row['price'],
+                prediction_result=row['prediction_result'],
+                prediction_source=row['prediction_source']
+            )
+            db.add(prediction)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error saving predictions to the database: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error saving predictions to the database.")
+
+    return {"predictions": predictions.tolist()}
 
 @app.get("/past-predictions")
 def get_past_predictions(
@@ -94,8 +133,8 @@ def get_past_predictions(
 ):
     try:
         query = db.query(Prediction).filter(
-            Prediction.prediction_date >= start_date.date(),
-            Prediction.prediction_date <= end_date.date()
+            Prediction.prediction_date >= start_date,
+            Prediction.prediction_date <= end_date
         )
         
         if prediction_source != "all":
@@ -106,6 +145,7 @@ def get_past_predictions(
         results = [
             {
                 "prediction_date": pred.prediction_date,
+                "prediction_time": pred.prediction_time,
                 "airline": pred.airline,
                 "flight": pred.flight,
                 "source_city": pred.source_city,
@@ -130,4 +170,6 @@ def get_past_predictions(
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving past predictions: {str(e)}")
 
 if __name__ == "__main__":
-    main()
+    # Use `uvicorn.run(app, host="0.0.0.0", port=8000)` to run the FastAPI app if needed.
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
