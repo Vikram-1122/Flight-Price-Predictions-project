@@ -1,0 +1,45 @@
+data_docs:
+  sites:
+    local_site:
+      class_name: SiteBuilder
+      store_backend:
+        class_name: Tuple
+        store_backend:
+          class_name: InMemoryStoreBackend
+          credentials: {}
+      site_index_builder:
+        class_name: DefaultSiteIndexBuilder
+
+expectations_store:
+  class_name: ExpectationsStore
+  store_backend:
+    class_name: Tuple
+    store_backend:
+      class_name: InMemoryStoreBackend
+      credentials: {}
+
+validation_operators:
+  default:
+    class_name: ActionListValidationOperator
+    action_list:
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParamsAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
+      - name: raise_validation_errors
+        action:
+          class_name: RaiseValidationErrorAction
+data_sources:
+  my_datasource:
+    class_name: Datasource
+    module_name: great_expectations.datasource
+    data_connectors:
+      my_file_data_connector:
+        class_name: ConfiguredAssetFilesystemDataConnector
+        module_name: great_expectations.datasource.data_connector
+        assets:
+          my_asset:
+            glob_directive: "*.csv"  # Specify the file type to include all CSV files
+            base_directory: "C:\Users\sumith singh\dsp-skyprix\airflow-alpha\raw_data"  # Replace with the path to your raw_data folder
