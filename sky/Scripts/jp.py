@@ -1,4 +1,4 @@
-#!C:\Users\sumith singh\Miniconda3\envs\sky\python.exe
+#!C:\Users\sumith singh\dsp-skyprix\sky\Scripts\python.exe
 
 import sys
 import json
