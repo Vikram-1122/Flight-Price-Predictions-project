@@ -5,6 +5,8 @@ import json
 from datetime import datetime
 from sqlalchemy import create_engine
 import great_expectations as ge
+from great_expectations.data_context import DataContext
+from great_expectations.core.batch import BatchRequest
 from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
 from airflow.providers.http.operators.http import SimpleHttpOperator
@@ -32,8 +34,14 @@ def my_data_ingestion_dag():
     def read_data() -> str:
         raw_data_folder = '/opt/airflow/raw_data'
         files = [f for f in os.listdir(raw_data_folder) if f.endswith('.csv') and not f.startswith('.ipynb_checkpoints')]
+        logging.info(f"Files found in raw data folder: {files}")
+
         if files:
-            return os.path.join(raw_data_folder, files[0])
+            file_path = os.path.join(raw_data_folder, files[0])
+            logging.info(f"Reading file: {file_path}")
+            return file_path
+        
+        logging.warning("No files found in raw data folder")
         return ""
 
     @task
@@ -44,7 +52,7 @@ def my_data_ingestion_dag():
 
         # Load data and initialize Great Expectations DataFrame
         data = pd.read_csv(file_path)
-        df_ge = ge.dataset.PandasDataset(data)
+        df_ge = ge.from_pandas(data)
 
         # PostgreSQL Connection
         engine = create_engine('postgresql://postgres:root@localhost:5432/predictions')
@@ -114,7 +122,7 @@ def my_data_ingestion_dag():
         }
 
         # Save to PostgreSQL
-        engine = create_engine("postgresql://postgres:root@localhost:5432/predictions")
+        engine = create_engine("postgresql://postgres:root@localhost:5433/predictions")
         with engine.connect() as conn:
             conn.execute(
                 """
@@ -141,10 +149,20 @@ def my_data_ingestion_dag():
         )
         alert.execute({})  # Execute the alert task
 
+    @task
+    def split_and_save_data(file_path: str, validation_results: dict):
+        data = pd.read_csv(file_path)
+        # Data splitting code here ...
+        # Move or split the data into good_data and bad_data folders as per validation
+
     # Define the workflow
     file_path = read_data()
     validation_results = validate_data(file_path)
-    save_statistics(file_path, validation_results)
-    send_alert(file_path, validation_results)
+    save_statistics_task = save_statistics(file_path, validation_results)
+    send_alert_task = send_alert(file_path, validation_results)
+    split_and_save_data_task = split_and_save_data(file_path, validation_results)
+
+    # Define task dependencies
+    file_path >> validation_results >> save_statistics_task >> send_alert_task
 
 data_ingestion_dag = my_data_ingestion_dag()

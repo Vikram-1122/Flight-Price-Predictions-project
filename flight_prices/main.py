@@ -170,6 +170,4 @@ def get_past_predictions(
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving past predictions: {str(e)}")
 
 if __name__ == "__main__":
-    # Use `uvicorn.run(app, host="0.0.0.0", port=8000)` to run the FastAPI app if needed.
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    main()
