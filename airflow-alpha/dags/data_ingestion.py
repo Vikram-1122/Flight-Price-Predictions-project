@@ -1,7 +1,7 @@
 import logging
+import pandas as pd
 import os
 import json
-import pandas as pd
 from datetime import datetime
 from sqlalchemy import create_engine
 import great_expectations as ge
@@ -31,101 +31,124 @@ def my_data_ingestion_dag():
     @task
     def read_data() -> str:
         raw_data_folder = '/opt/airflow/raw_data'
-        files = [f for f in os.listdir(raw_data_folder) if f.endswith('.csv')]
-        logging.info(f"Files found in raw data folder: {files}")
-
+        files = [f for f in os.listdir(raw_data_folder) if f.endswith('.csv') and not f.startswith('.ipynb_checkpoints')]
         if files:
-            file_path = os.path.join(raw_data_folder, files[0])
-            logging.info(f"Reading file: {file_path}")
-            return file_path
-        
-        logging.warning("No files found in raw data folder")
+            return os.path.join(raw_data_folder, files[0])
         return ""
 
     @task
-def validate_data(file_path: str) -> dict:
-    if not file_path:
-        logging.error("No file provided for validation")
-        return {"status": "Failed", "errors": {}}
+    def validate_data(file_path: str) -> dict:
+        if not file_path:
+            logging.error("No file provided for validation")
+            return {"status": "Failed", "errors": {}}
 
-    # Load data
-    data = pd.read_csv(file_path)
+        # Load data and initialize Great Expectations DataFrame
+        data = pd.read_csv(file_path)
+        df_ge = ge.dataset.PandasDataset(data)
 
-    # PostgreSQL Connection
-    engine = create_engine('postgresql://postgres:root@localhost:5432/predictions')
+        # PostgreSQL Connection
+        engine = create_engine('postgresql://postgres:root@localhost:5432/predictions')
 
-    # Error logging dictionary
-    error_log = {
-        "error_type": [],
-        "column": [],
-        "row_index": [],
-        "timestamp": []
-    }
+        # Define the validation suite
+        validation_suite = [
+            {"expectation": "expect_column_values_to_be_in_set", "column": "travel_class", "kwargs": {"value_set": ["Economy", "Business"]}},
+            {"expectation": "expect_column_values_to_be_in_set", "column": "airline", "kwargs": {"value_set": ["AirAsia", "SpiceJet", "Vistara", "GO_FIRST", "Indigo", "Air_India"]}},
+            {"expectation": "expect_column_values_to_be_in_set", "column": "source_city", "kwargs": {"value_set": ["Mumbai", "Delhi", "Hyderabad", "Bangalore", "Kolkata", "Chennai"]}},
+            {"expectation": "expect_column_values_to_be_between", "column": "price", "kwargs": {"min_value": 1, "max_value": 100000}},
+            {"expectation": "expect_column_values_to_be_of_type", "column": "price", "kwargs": {"type_": "float"}},
+            {"expectation": "expect_column_values_to_be_of_type", "column": "travel_class", "kwargs": {"type_": "string"}},
+            {"expectation": "expect_column_to_exist", "column": "days_left", "kwargs": {}},
+            {"expectation": "expect_column_values_to_not_be_null", "column": "price", "kwargs": {}},
+            {"expectation": "expect_column_value_lengths_to_be_between", "column": "duration", "kwargs": {"min_value": 4, "max_value": 8}},
+            {"expectation": "expect_column_values_to_match_regex", "column": "duration", "kwargs": {"regex": r"^\d{1,2}h \d{1,2}m$"}}
+        ]
 
-    # Type mapping
-    type_mapping = {
-        "float": float,
-        "string": str
-    }
+        # Error logging dictionary
+        error_log = {
+            "error_type": [],
+            "column": [],
+            "row_index": [],
+            "timestamp": []
+        }
 
-    # Define the validation suite
-    validations = [
-        {"expectation": "expect_column_values_to_be_in_set", "column": "travel_class", "kwargs": {"value_set": ["Economy", "Business"]}},
-        {"expectation": "expect_column_values_to_be_in_set", "column": "airline", "kwargs": {"value_set": ["AirAsia", "SpiceJet", "Vistara", "GO_FIRST", "Indigo", "Air_India"]}},
-        {"expectation": "expect_column_values_to_be_in_set", "column": "source_city", "kwargs": {"value_set": ["Mumbai", "Delhi", "Hyderabad", "Bangalore", "Kolkata", "Chennai"]}},
-        {"expectation": "expect_column_values_to_be_between", "column": "price", "kwargs": {"min_value": 1, "max_value": 100000}},
-        {"expectation": "expect_column_values_to_be_of_type", "column": "price", "kwargs": {"type_": "float"}},
-        {"expectation": "expect_column_values_to_be_of_type", "column": "travel_class", "kwargs": {"type_": "string"}},
-        {"expectation": "expect_column_to_exist", "column": "days_left", "kwargs": {}},
-        {"expectation": "expect_column_values_to_not_be_null", "column": "price", "kwargs": {}},
-        {"expectation": "expect_column_value_lengths_to_be_between", "column": "duration", "kwargs": {"min_value": 4, "max_value": 8}},
-        {"expectation": "expect_column_values_to_match_regex", "column": "duration", "kwargs": {"regex": r"^\d{1,2}h \d{1,2}m$"}}
-    ]
+        # Run validations and log failures
+        for validation in validation_suite:
+            expectation = validation["expectation"]
+            column = validation["column"]
+            kwargs = validation["kwargs"]
 
-    # Run validations and log failures
-    for validation in validations:
-        expectation = validation["expectation"]
-        column = validation["column"]
-        kwargs = validation["kwargs"]
-
-        # Use the appropriate Great Expectations methods
-        if expectation == "expect_column_values_to_be_in_set":
-            result = data[column].isin(kwargs["value_set"])
-            unexpected_index_list = data.index[~result].tolist()
-        elif expectation == "expect_column_values_to_be_between":
-            result = data[column].between(kwargs["min_value"], kwargs["max_value"])
-            unexpected_index_list = data.index[~result].tolist()
-        elif expectation == "expect_column_values_to_be_of_type":
-            result = data[column].apply(lambda x: isinstance(x, type_mapping[kwargs["type_"]]))
-            unexpected_index_list = data.index[~result].tolist()
-        elif expectation == "expect_column_to_exist":
-            if column not in data.columns:
-                unexpected_index_list = list(range(len(data)))  # All rows have this issue
+            # Special handling for length validation on 'duration' column
+            if expectation == "expect_column_value_lengths_to_be_between":
+                result = data[column].apply(lambda x: len(x) if isinstance(x, str) else 0).between(kwargs["min_value"], kwargs["max_value"])
             else:
-                unexpected_index_list = []
-        elif expectation == "expect_column_values_to_not_be_null":
-            result = data[column].notnull()
-            unexpected_index_list = data.index[~result].tolist()
-        elif expectation == "expect_column_value_lengths_to_be_between":
-            result = data[column].apply(len).between(kwargs["min_value"], kwargs["max_value"])
-            unexpected_index_list = data.index[~result].tolist()
-        elif expectation == "expect_column_values_to_match_regex":
-            result = data[column].str.match(kwargs["regex"])
-            unexpected_index_list = data.index[~result].tolist()
+                # Run the expectation for other validations
+                result = getattr(df_ge, expectation)(column=column, **kwargs)
 
-        # Check for failures and log errors for each failed row
-        for unexpected_index in unexpected_index_list:
-            error_log["error_type"].append(expectation)
-            error_log["column"].append(column)
-            error_log["row_index"].append(unexpected_index)
-            error_log["timestamp"].append(datetime.now())
+            # Check for failures and log errors for each failed row
+            if not result.success:
+                for unexpected_index in result.result.get("unexpected_index_list", []):
+                    error_log["error_type"].append(expectation)
+                    error_log["column"].append(column)
+                    error_log["row_index"].append(unexpected_index)
+                    error_log["timestamp"].append(datetime.now())
 
-    # Convert error log to DataFrame for easy insertion into PostgreSQL
-    if error_log["error_type"]:  # Only save if there are errors
-        error_log_df = pd.DataFrame(error_log)
-        error_log_df.to_sql("stats", engine, if_exists="append", index=False)
-        logging.info("Error log saved to PostgreSQL")
+        # Convert error log to DataFrame for easy insertion into PostgreSQL
+        if error_log["error_type"]:  # Only save if there are errors
+            error_log_df = pd.DataFrame(error_log)
+            error_log_df.to_sql("stats", engine, if_exists="append", index=False)
+            logging.info("Error log saved to PostgreSQL")
 
-    # Prepare validation results summary
-    validation_status = "Success" if not error_log["error_type"] else "Failed"
-    return {"status": validation_status, "errors": error_log}
+        # Prepare validation results summary
+        validation_status = "Success" if not error_log["error_type"] else "Failed"
+        return {"status": validation_status, "errors": error_log}
+
+    @task
+    def save_statistics(file_path: str, validation_results: dict):
+        if validation_results["status"] == "Success":
+            logging.info("Validation passed; skipping statistics logging.")
+            return
+
+        # Prepare stats data
+        stats_data = {
+            "file_name": os.path.basename(file_path),
+            "validation_status": validation_results["status"],
+            "error_count": len(validation_results["errors"]["error_type"]),
+            "error_details": json.dumps(validation_results["errors"]),
+            "timestamp": datetime.now()
+        }
+
+        # Save to PostgreSQL
+        engine = create_engine("postgresql://postgres:root@localhost:5432/predictions")
+        with engine.connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO stats (file_name, validation_status, error_count, error_details, timestamp)
+                VALUES (%(file_name)s, %(validation_status)s, %(error_count)s, %(error_details)s, %(timestamp)s)
+                """,
+                stats_data
+            )
+        logging.info("Statistics saved to PostgreSQL")
+
+    @task
+    def send_alert(file_path: str, validation_results: dict):
+        status = validation_results["status"]
+        filename = os.path.basename(file_path)
+        error_summary = f"File ingestion {status}! File: {filename}\nErrors: {json.dumps(validation_results['errors'])}"
+
+        alert = SimpleHttpOperator(
+            task_id='send_alert',
+            method='POST',
+            http_conn_id='msteams_webhook',
+            endpoint='',
+            headers={"Content-Type": "application/json"},
+            data=json.dumps({"text": error_summary}),
+        )
+        alert.execute({})  # Execute the alert task
+
+    # Define the workflow
+    file_path = read_data()
+    validation_results = validate_data(file_path)
+    save_statistics(file_path, validation_results)
+    send_alert(file_path, validation_results)
+
+data_ingestion_dag = my_data_ingestion_dag()
