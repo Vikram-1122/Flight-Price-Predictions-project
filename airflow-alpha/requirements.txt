@@ -1,0 +1,10 @@
+apache-airflow==2.9.0 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.8.2/constraints-3.10.txt
+fastapi==0.112.1
+uvicorn==0.30.6
+numpy==1.26.4
+scikit-learn==1.5.1
+pandas==2.1.4
+joblib==1.4.2
+sqlalchemy==1.4.54
+streamlit==1.37.1
+great_expectations==0.15

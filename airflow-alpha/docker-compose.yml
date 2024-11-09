@@ -50,7 +50,7 @@ x-airflow-common:
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
   image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.9.3}
-  # build: .
+  build: .
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
@@ -81,7 +81,9 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/good_data:/opt/airflow/good_data
     - ${AIRFLOW_PROJ_DIR:-.}/bad_data:/opt/airflow/bad_data
     - ${AIRFLOW_PROJ_DIR:-.}/processed_files_tracker.txt:/opt/airflow/processed_files_tracker.txt
-    - ${AIRFLOW_PROJ_DIR:-.}save_statistics:/opt/airflow/save_statistics.csv
+    - ${AIRFLOW_PROJ_DIR:-.}/save_statistics:/opt/airflow/save_statistics.csv
+    - ${AIRFLOW_PROJ_DIR:-.}/great_expectations:/opt/airflow/great_expectations
+
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
